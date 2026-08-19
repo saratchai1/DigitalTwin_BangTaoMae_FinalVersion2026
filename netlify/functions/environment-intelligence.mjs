@@ -4,6 +4,8 @@ const PROJECT = {
   label: "โครงการบางเท่าแม่",
 };
 
+const DWR_PRIMARY_STATION = "STN2113";
+
 const URLS = {
   openMeteo:
     `https://api.open-meteo.com/v1/forecast?latitude=${PROJECT.lat}&longitude=${PROJECT.lon}` +
@@ -19,10 +21,14 @@ const URLS = {
   tmdWarning: "https://www.tmd.go.th/api/xml/warning-news",
   tmdKrabi: "https://www.tmd.go.th/api/xml/weather-report?stationnumber=48563",
   dwrEws: "https://ews.dwr.go.th/ews/index.php?language=th",
+  dwrRainDaily: "https://ews.dwr.go.th/ews/rain_daily.php",
+  dwrServiceList: "https://ews.dwr.go.th/ews/service_list.php",
+  dwrKrabi: `https://ews.dwr.go.th/ews/index.php?province=${encodeURIComponent("กระบี่")}`,
 };
 
 function numberOrNull(value) {
-  const parsed = Number(value);
+  if (value === null || value === undefined || value === "" || /^(?:n\/?a|-{1,3})$/i.test(String(value).trim())) return null;
+  const parsed = Number(String(value).replace(/,/g, "").trim());
   return Number.isFinite(parsed) ? parsed : null;
 }
 
@@ -52,17 +58,20 @@ function max(values, start, count) {
 function decodeEntities(value = "") {
   return value
     .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
+    .replace(/&nbsp;|&#160;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/&#(\d+);/g, (_match, code) => String.fromCharCode(Number(code)));
 }
 
 function stripHtml(value = "") {
   return decodeEntities(value)
     .replace(/<br\s*\/?\s*>/gi, " ")
+    .replace(/<script\b[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style\b[\s\S]*?<\/style>/gi, " ")
     .replace(/<[^>]+>/g, " ")
     .replace(/\s+/g, " ")
     .trim();
@@ -89,8 +98,8 @@ function parseRss(xml = "") {
 
 async function fetchJson(url) {
   const response = await fetch(url, {
-    headers: { "user-agent": "BangTaoMae-DigitalTwin/1.0" },
-    signal: AbortSignal.timeout(9000),
+    headers: { "user-agent": "BangTaoMae-DigitalTwin/1.1", accept: "application/json,text/plain,*/*" },
+    signal: AbortSignal.timeout(10000),
   });
   if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
   return response.json();
@@ -98,8 +107,8 @@ async function fetchJson(url) {
 
 async function fetchText(url) {
   const response = await fetch(url, {
-    headers: { "user-agent": "BangTaoMae-DigitalTwin/1.0" },
-    signal: AbortSignal.timeout(9000),
+    headers: { "user-agent": "BangTaoMae-DigitalTwin/1.1", accept: "text/html,application/xml,text/xml,*/*" },
+    signal: AbortSignal.timeout(10000),
   });
   if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
   return response.text();
@@ -216,12 +225,137 @@ function extractWeather(payload) {
       windSpeed: numberOrNull(current.wind_speed_10m),
       windDirection: numberOrNull(current.wind_direction_10m),
     },
+    next1hRain: sum(hourly.precipitation, index, 1),
     next3hRain: sum(hourly.precipitation, index, 3),
     next6hRain: sum(hourly.precipitation, index, 6),
     next24hRain: sum(hourly.precipitation, index, 24),
     next3hMaxRainProbability: max(hourly.precipitation_probability, index, 3),
     next24hMaxRainProbability: max(hourly.precipitation_probability, index, 24),
     daily: dailyForecast,
+  };
+}
+
+function parseHtmlRows(html = "") {
+  return [...html.matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/gi)]
+    .map((rowMatch) =>
+      [...rowMatch[1].matchAll(/<t[dh]\b[^>]*>([\s\S]*?)<\/t[dh]>/gi)].map((cell) => stripHtml(cell[1])),
+    )
+    .filter((row) => row.length > 1);
+}
+
+function stationScore(station) {
+  let score = 0;
+  if (station.stationId === DWR_PRIMARY_STATION) score += 1000;
+  if (/อ่าวลึก/.test(station.district)) score += 200;
+  if (/คลองยา/.test(station.subdistrict)) score += 150;
+  if (/กระบี่/.test(station.province)) score += 100;
+  if (station.stationId === "STN1757") score += 60;
+  return score;
+}
+
+function parseDwrRainDaily(html = "") {
+  const rows = parseHtmlRows(html);
+  const stations = rows
+    .filter((row) => row.some((cell) => /^STN\d+$/i.test(cell)))
+    .map((row) => {
+      const idIndex = row.findIndex((cell) => /^STN\d+$/i.test(cell));
+      const cells = idIndex > 0 ? row.slice(idIndex - 1) : row;
+      return {
+        stationId: cells[1] || "",
+        name: cells[2] || "",
+        subdistrict: cells[3] || "",
+        district: cells[4] || "",
+        province: cells[5] || "",
+        office: cells[6] || "",
+        hydroSection: cells[7] || "",
+        rain15m: numberOrNull(cells[8]),
+        rain12h: numberOrNull(cells[9]),
+        rain24h: numberOrNull(cells[10]),
+        temperature: numberOrNull(cells[11]),
+        waterLevel: numberOrNull(cells[12]),
+        soilMoisture: numberOrNull(cells[13]),
+      };
+    })
+    .filter((station) => /กระบี่/.test(station.province));
+
+  const selected = stations.sort((a, b) => stationScore(b) - stationScore(a))[0] || null;
+  if (!selected) return null;
+
+  const pageText = stripHtml(html);
+  const updateMatch = pageText.match(/ข้อมูล\s*ณ\.?\s*เวลา\s*([^\n]+?)(?:นาฬิกา|Excel|CSV|XML|$)/i);
+
+  return {
+    ...selected,
+    source: "DWR EWS · กรมทรัพยากรน้ำ",
+    sourceType: "official",
+    selection: selected.stationId === DWR_PRIMARY_STATION ? "primary-locality" : "nearest-locality-fallback",
+    updatedText: updateMatch?.[1]?.trim() || null,
+  };
+}
+
+function parseDwrServiceRow(html = "", stationId = DWR_PRIMARY_STATION) {
+  const rows = parseHtmlRows(html);
+  const row = rows.find((cells) => cells.some((cell) => cell.includes(stationId)));
+  if (!row) return null;
+
+  const joined = row.join(" | ");
+  const warningCell = row.find((cell) => /(เฝ้าระวัง|เตรียมพร้อม|เตือนภัย|วิกฤต|วิกฤติ|อพยพ)/.test(cell)) || "";
+  let alertLevel = "normal";
+  let alertLabel = "ปกติ";
+  if (/(วิกฤต|วิกฤติ|อพยพ)/.test(warningCell)) {
+    alertLevel = "critical";
+    alertLabel = warningCell;
+  } else if (/(เตรียมพร้อม|เตือนภัย)/.test(warningCell)) {
+    alertLevel = "warning";
+    alertLabel = warningCell;
+  } else if (/เฝ้าระวัง/.test(warningCell)) {
+    alertLevel = "watch";
+    alertLabel = warningCell;
+  }
+
+  const timestamp = row.find((cell) => /\d{4}\/\d{2}\/\d{2}\s+\d{1,2}:\d{2}/.test(cell)) || null;
+  return { alertLevel, alertLabel, timestamp, rawSummary: joined };
+}
+
+function parseDwrProvinceStatus(html = "") {
+  const text = stripHtml(html);
+  const totalMatch = text.match(/สถานการณ์เตือนภัย\s*([\d,]+)\s*สถานี/i);
+  const total = totalMatch ? numberOrNull(totalMatch[1]) : null;
+  return {
+    activeStations: total,
+    hasActiveAlert: total !== null ? total > 0 : false,
+  };
+}
+
+function buildDwr(rainDailyHtml, serviceHtml, provinceHtml) {
+  const station = parseDwrRainDaily(rainDailyHtml || "");
+  const service = station ? parseDwrServiceRow(serviceHtml || "", station.stationId) : null;
+  const province = parseDwrProvinceStatus(provinceHtml || "");
+  if (!station && !service) return null;
+
+  return {
+    name: "EWS น้ำหลาก-ดินถล่ม · กรมทรัพยากรน้ำ",
+    url: URLS.dwrEws,
+    source: "DWR EWS · กรมทรัพยากรน้ำ",
+    sourceType: "official",
+    stationId: station?.stationId || DWR_PRIMARY_STATION,
+    stationName: station?.name || "บ้านคลองยา",
+    subdistrict: station?.subdistrict || "คลองยา",
+    district: station?.district || "อ่าวลึก",
+    province: station?.province || "กระบี่",
+    selection: station?.selection || "primary-locality",
+    rain15m: station?.rain15m ?? null,
+    rain12h: station?.rain12h ?? null,
+    rain24h: station?.rain24h ?? null,
+    temperature: station?.temperature ?? null,
+    waterLevel: station?.waterLevel ?? null,
+    soilMoisture: station?.soilMoisture ?? null,
+    updatedAt: service?.timestamp || station?.updatedText || null,
+    alertLevel: service?.alertLevel || "normal",
+    alertLabel: service?.alertLabel || "ปกติ",
+    provinceActiveStations: province.activeStations,
+    provinceHasActiveAlert: province.hasActiveAlert,
+    note: "สถานีอ้างอิงพื้นที่อ่าวลึก/คลองยา; ฝน 12 ชม. และฝนรายวันเป็นค่าตรวจวัด DWR EWS",
   };
 }
 
@@ -252,31 +386,43 @@ function resultStatus(result) {
 }
 
 export const handler = async () => {
-  const [weatherResult, modelAirResult, air4ThaiResult, tmdRegionResult, tmdWarningResult, tmdKrabiResult] =
-    await Promise.allSettled([
-      fetchJson(URLS.openMeteo),
-      fetchJson(URLS.openMeteoAir),
-      fetchJson(URLS.air4Thai),
-      fetchText(URLS.tmdRegion),
-      fetchText(URLS.tmdWarning),
-      fetchText(URLS.tmdKrabi),
-    ]);
+  const [
+    weatherResult,
+    modelAirResult,
+    air4ThaiResult,
+    tmdRegionResult,
+    tmdWarningResult,
+    tmdKrabiResult,
+    dwrRainDailyResult,
+    dwrServiceResult,
+    dwrKrabiResult,
+  ] = await Promise.allSettled([
+    fetchJson(URLS.openMeteo),
+    fetchJson(URLS.openMeteoAir),
+    fetchJson(URLS.air4Thai),
+    fetchText(URLS.tmdRegion),
+    fetchText(URLS.tmdWarning),
+    fetchText(URLS.tmdKrabi),
+    fetchText(URLS.dwrRainDaily),
+    fetchText(URLS.dwrServiceList),
+    fetchText(URLS.dwrKrabi),
+  ]);
 
-  const weather =
-    weatherResult.status === "fulfilled" ? extractWeather(weatherResult.value) : null;
+  const weather = weatherResult.status === "fulfilled" ? extractWeather(weatherResult.value) : null;
 
-  const officialAir =
-    air4ThaiResult.status === "fulfilled" ? extractAir4Thai(air4ThaiResult.value) : null;
-  const fallbackAir =
-    modelAirResult.status === "fulfilled" ? extractOpenMeteoAir(modelAirResult.value) : null;
+  const officialAir = air4ThaiResult.status === "fulfilled" ? extractAir4Thai(air4ThaiResult.value) : null;
+  const fallbackAir = modelAirResult.status === "fulfilled" ? extractOpenMeteoAir(modelAirResult.value) : null;
   const air = officialAir?.pm25 !== null ? officialAir : fallbackAir;
 
-  const tmdForecastItems =
-    tmdRegionResult.status === "fulfilled" ? parseRss(tmdRegionResult.value) : [];
-  const tmdWarningItems =
-    tmdWarningResult.status === "fulfilled" ? parseRss(tmdWarningResult.value) : [];
-  const tmdKrabiItems =
-    tmdKrabiResult.status === "fulfilled" ? parseRss(tmdKrabiResult.value) : [];
+  const tmdForecastItems = tmdRegionResult.status === "fulfilled" ? parseRss(tmdRegionResult.value) : [];
+  const tmdWarningItems = tmdWarningResult.status === "fulfilled" ? parseRss(tmdWarningResult.value) : [];
+  const tmdKrabiItems = tmdKrabiResult.status === "fulfilled" ? parseRss(tmdKrabiResult.value) : [];
+
+  const dwr = buildDwr(
+    dwrRainDailyResult.status === "fulfilled" ? dwrRainDailyResult.value : "",
+    dwrServiceResult.status === "fulfilled" ? dwrServiceResult.value : "",
+    dwrKrabiResult.status === "fulfilled" ? dwrKrabiResult.value : "",
+  );
 
   const payload = {
     location: PROJECT,
@@ -288,10 +434,29 @@ export const handler = async () => {
       krabiObservation: tmdKrabiItems[0] || null,
       warnings: decorateTmdWarnings(tmdWarningItems),
     },
-    dwr: {
+    dwr: dwr || {
       name: "EWS น้ำหลาก-ดินถล่ม · กรมทรัพยากรน้ำ",
       url: URLS.dwrEws,
-      note: "ใช้เป็นแหล่งตรวจสอบประกาศ/สถานี EWS เพิ่มเติม; หน้าเว็บต้นทางอาจไม่เปิด API แบบไม่ต้องยืนยันตัวตน",
+      source: "DWR EWS · กรมทรัพยากรน้ำ",
+      sourceType: "official",
+      stationId: DWR_PRIMARY_STATION,
+      stationName: "บ้านคลองยา",
+      subdistrict: "คลองยา",
+      district: "อ่าวลึก",
+      province: "กระบี่",
+      selection: "primary-locality",
+      rain15m: null,
+      rain12h: null,
+      rain24h: null,
+      temperature: null,
+      waterLevel: null,
+      soilMoisture: null,
+      updatedAt: null,
+      alertLevel: "unknown",
+      alertLabel: "รอข้อมูล",
+      provinceActiveStations: null,
+      provinceHasActiveAlert: false,
+      note: "DWR EWS ต้นทางไม่ตอบสนองในรอบนี้; ไม่ใช้ค่าจำลองแทนข้อมูลตรวจวัดทางการ",
     },
     sources: [
       {
@@ -319,6 +484,14 @@ export const handler = async () => {
         url: URLS.tmdKrabi,
       },
       {
+        id: "dwr-ews",
+        label: "ฝน 15 นาที / 12 / 24 ชม. และสถานะเตือนภัย",
+        agency: "กรมทรัพยากรน้ำ (DWR EWS)",
+        type: "official",
+        status: dwr ? "online" : "unavailable",
+        url: URLS.dwrRainDaily,
+      },
+      {
         id: "air4thai",
         label: "PM2.5 / AQI สถานีใกล้สุด",
         agency: "กรมควบคุมมลพิษ (Air4Thai)",
@@ -328,19 +501,11 @@ export const handler = async () => {
       },
       {
         id: "open-meteo",
-        label: "พยากรณ์รายพิกัด 7 วัน",
+        label: "พยากรณ์รายพิกัด 1/3/6/24 ชม. และ 7 วัน",
         agency: "Open-Meteo",
         type: "model",
         status: resultStatus(weatherResult),
         url: URLS.openMeteo,
-      },
-      {
-        id: "dwr-ews",
-        label: "EWS น้ำหลาก-ดินถล่ม",
-        agency: "กรมทรัพยากรน้ำ (DWR)",
-        type: "official-link",
-        status: "link",
-        url: URLS.dwrEws,
       },
     ],
   };
