@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", sans-serif;
+
+  --color-main: var(--color-bg-main);
+  --color-panel: var(--color-bg-panel);
+  --color-sidebar: var(--color-bg-sidebar);
+  --color-text-main: var(--color-text-main);
+  --color-text-muted: var(--color-text-muted);
+  --color-border: var(--color-border);
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-success: var(--color-success);
+  --color-danger: var(--color-danger);
+  --color-warning: var(--color-warning);
+}
+
+@layer base {
+  :root {
+    /* Green Theme (Default - Earth) */
+    --color-bg-main: #1B3A2B;
+    --color-bg-panel: #396843;
+    --color-bg-sidebar: #1B3A2B;
+    --color-text-main: #F0EBE1;
+    --color-text-muted: #84C198;
+    --color-border: #BDB531;
+    --color-accent: #BDB531;
+    --color-accent-hover: #BE9D26;
+    --color-success: #007F69;
+    --color-danger: #76202A;
+    --color-warning: #F1BF50;
+  }
+
+  .theme-dark {
+    /* Dark Theme (Ash) */
+    --color-bg-main: #525252;
+    --color-bg-panel: #404040;
+    --color-bg-sidebar: #525252;
+    --color-text-main: #F0EBE1;
+    --color-text-muted: #A3A3A3;
+    --color-border: #606060;
+    --color-accent: #84C198;
+    --color-accent-hover: #BDB531;
+    --color-success: #007F69;
+    --color-danger: #76202A;
+    --color-warning: #F1BF50;
+  }
+
+  .theme-light {
+    /* Light Theme (Paper) */
+    --color-bg-main: #F0EBE1;
+    --color-bg-panel: #FFFFFF;
+    --color-bg-sidebar: #F0EBE1;
+    --color-text-main: #1B3A2B;
+    --color-text-muted: #525252;
+    --color-border: #BDB531;
+    --color-accent: #D14E29;
+    --color-accent-hover: #BE9D26;
+    --color-success: #007F69;
+    --color-danger: #76202A;
+    --color-warning: #532F1D;
+  }
+}
+
+body {
+  background-color: var(--color-bg-main);
+  color: var(--color-text-main);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+}

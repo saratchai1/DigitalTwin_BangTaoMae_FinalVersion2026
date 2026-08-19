@@ -1,0 +1,5 @@
+{
+  "name": "Remix: iTwin Web Viewer Dashboard",
+  "description": "A React application for the iTwin Web Viewer, initialized from the official template.",
+  "requestFramePermissions": []
+}
