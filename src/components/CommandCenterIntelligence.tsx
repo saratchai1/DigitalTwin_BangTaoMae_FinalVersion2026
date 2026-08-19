@@ -29,6 +29,38 @@ type ForecastDay = {
   maxWind: number | null;
 };
 
+type FeedItem = {
+  title: string;
+  summary: string;
+  link: string;
+  publishedAt: string;
+};
+
+type DwrData = {
+  name: string;
+  url: string;
+  source: string;
+  sourceType: string;
+  stationId: string;
+  stationName: string;
+  subdistrict: string;
+  district: string;
+  province: string;
+  selection: string;
+  rain15m: number | null;
+  rain12h: number | null;
+  rain24h: number | null;
+  temperature: number | null;
+  waterLevel: number | null;
+  soilMoisture: number | null;
+  updatedAt: string | null;
+  alertLevel: "normal" | "watch" | "warning" | "critical" | "unknown";
+  alertLabel: string;
+  provinceActiveStations: number | null;
+  provinceHasActiveAlert: boolean;
+  note: string;
+};
+
 type IntelligenceData = {
   generatedAt: string;
   location: { lat: number; lon: number; label: string };
@@ -47,6 +79,7 @@ type IntelligenceData = {
       windSpeed: number | null;
       windDirection: number | null;
     };
+    next1hRain: number | null;
     next3hRain: number | null;
     next6hRain: number | null;
     next24hRain: number | null;
@@ -70,7 +103,7 @@ type IntelligenceData = {
     krabiObservation: FeedItem | null;
     warnings: Array<FeedItem & { relevant?: boolean; fresh?: boolean; ageHours?: number | null }>;
   };
-  dwr: { name: string; url: string; note: string };
+  dwr: DwrData;
   sources: Array<{
     id: string;
     label: string;
@@ -79,13 +112,6 @@ type IntelligenceData = {
     status: string;
     url: string;
   }>;
-};
-
-type FeedItem = {
-  title: string;
-  summary: string;
-  link: string;
-  publishedAt: string;
 };
 
 interface CommandCenterIntelligenceProps {
@@ -178,6 +204,7 @@ async function fetchFallback(): Promise<IntelligenceData> {
         windSpeed: raw.current?.wind_speed_10m ?? null,
         windDirection: raw.current?.wind_direction_10m ?? null,
       },
+      next1hRain: sliceSum(1),
       next3hRain: sliceSum(3),
       next6hRain: sliceSum(6),
       next24hRain: sliceSum(24),
@@ -210,12 +237,31 @@ async function fetchFallback(): Promise<IntelligenceData> {
     dwr: {
       name: "EWS น้ำหลาก-ดินถล่ม · กรมทรัพยากรน้ำ",
       url: "https://ews.dwr.go.th/ews/index.php?language=th",
-      note: "เปิดตรวจสอบข้อมูล EWS จากต้นทาง",
+      source: "DWR EWS · กรมทรัพยากรน้ำ",
+      sourceType: "official",
+      stationId: "STN2113",
+      stationName: "บ้านคลองยา",
+      subdistrict: "คลองยา",
+      district: "อ่าวลึก",
+      province: "กระบี่",
+      selection: "primary-locality",
+      rain15m: null,
+      rain12h: null,
+      rain24h: null,
+      temperature: null,
+      waterLevel: null,
+      soilMoisture: null,
+      updatedAt: null,
+      alertLevel: "unknown",
+      alertLabel: "รอข้อมูล",
+      provinceActiveStations: null,
+      provinceHasActiveAlert: false,
+      note: "ต้องใช้ Netlify Function เพื่ออ่านข้อมูล DWR ทางการ",
     },
     sources: [
       {
         id: "open-meteo",
-        label: "พยากรณ์รายพิกัด 7 วัน",
+        label: "พยากรณ์รายพิกัด 1/3/6/24 ชม. และ 7 วัน",
         agency: "Open-Meteo",
         type: "model",
         status: "online",
@@ -229,6 +275,14 @@ async function fetchFallback(): Promise<IntelligenceData> {
         status: "unavailable",
         url: "https://www.tmd.go.th/api/xml/warning-news",
       },
+      {
+        id: "dwr-ews",
+        label: "ฝนตรวจวัดและสถานะเตือนภัย",
+        agency: "กรมทรัพยากรน้ำ (DWR EWS)",
+        type: "official",
+        status: "unavailable",
+        url: "https://ews.dwr.go.th/ews/rain_daily.php",
+      },
     ],
   };
 }
@@ -239,7 +293,7 @@ function RiskCard({
   status,
   detail,
   tone,
-  official = false,
+  officialLabel,
   onClick,
 }: {
   icon: typeof AlertTriangle;
@@ -247,7 +301,7 @@ function RiskCard({
   status: string;
   detail: string;
   tone: RiskTone;
-  official?: boolean;
+  officialLabel?: string;
   onClick?: () => void;
 }) {
   const content = (
@@ -256,7 +310,7 @@ function RiskCard({
       <div className="eci-risk-copy">
         <div className="eci-risk-title-row">
           <span>{title}</span>
-          {official && <small>OFFICIAL</small>}
+          {officialLabel && <small>{officialLabel}</small>}
         </div>
         <strong>{status}</strong>
         <p>{detail}</p>
@@ -313,50 +367,69 @@ export function CommandCenterIntelligence({
     [data],
   );
 
+  const weather = data?.weather;
+  const air = data?.air;
+  const dwr = data?.dwr;
+  const dwrAlertActive = Boolean(dwr && ["watch", "warning", "critical"].includes(dwr.alertLevel));
+  const sourceOnline = (id: string) => data?.sources?.find((source) => source.id === id)?.status === "online";
+
   const risk = useMemo(() => {
-    const rain3 = data?.weather?.next3hRain ?? 0;
-    const rain24 = data?.weather?.next24hRain ?? 0;
-    const probability = data?.weather?.next24hMaxRainProbability ?? 0;
+    const rain3 = weather?.next3hRain ?? 0;
+    const rain24 = weather?.next24hRain ?? 0;
+    const probability = weather?.next24hMaxRainProbability ?? 0;
 
     let floodTone: RiskTone = "normal";
     let floodStatus = "ปกติ";
-    let floodDetail = "ระดับน้ำและฝนยังไม่เข้าเกณฑ์คัดกรองของระบบ";
-    if (waterCriticalCount > 0) {
+    let floodDetail = "ระดับน้ำและประกาศทางการยังไม่เข้าเงื่อนไขเตือน";
+    let floodOfficial: string | undefined;
+
+    if (dwrAlertActive) {
+      floodTone = dwr?.alertLevel === "critical" ? "critical" : dwr?.alertLevel === "warning" ? "warning" : "watch";
+      floodStatus = dwr?.alertLabel || "DWR แจ้งเตือน";
+      floodDetail = `${dwr?.stationId} ${dwr?.stationName} · ฝน 12 ชม. ${n(dwr?.rain12h)} มม. · ระดับน้ำ ${n(dwr?.waterLevel)} ม.`;
+      floodOfficial = "DWR OFFICIAL";
+    } else if (waterCriticalCount > 0) {
       floodTone = "critical";
       floodStatus = "เฝ้าระวังสูง";
       floodDetail = `${waterCriticalCount} จุดสูงกว่าเกณฑ์วิกฤตของโครงการ · ยังไม่ใช่การยืนยันว่าเกิดน้ำท่วม`;
     } else if (waterWarningCount > 0 || rain24 >= 70) {
       floodTone = "warning";
       floodStatus = "เฝ้าระวัง";
-      floodDetail = `สถานีเฝ้าระวัง ${waterWarningCount} จุด · ฝนคาดการณ์ 24 ชม. ${n(rain24)} มม.`;
+      floodDetail = `สถานีโครงการเฝ้าระวัง ${waterWarningCount} จุด · ฝนแบบจำลอง 24 ชม. ${n(rain24)} มม.`;
     } else if (rain24 >= 30 || probability >= 70) {
       floodTone = "watch";
       floodStatus = "จับตา";
-      floodDetail = `ฝนคาดการณ์ 24 ชม. ${n(rain24)} มม. · โอกาสสูงสุด ${n(probability, 0)}%`;
+      floodDetail = `ฝนแบบจำลอง 24 ชม. ${n(rain24)} มม. · โอกาสสูงสุด ${n(probability, 0)}%`;
     }
 
     let flashTone: RiskTone = "normal";
-    let flashStatus = "ยังไม่พบสัญญาณสูง";
-    let flashDetail = `ฝน 3 ชม. ${n(rain3)} มม. · ฝน 24 ชม. ${n(rain24)} มม.`;
-    if (activeOfficialWarnings.length) {
+    let flashStatus = "ยังไม่พบประกาศเตือนเฉพาะพื้นที่";
+    let flashDetail = `DWR 12 ชม. ${n(dwr?.rain12h)} มม. · แบบจำลอง 3 ชม. ${n(rain3)} มม.`;
+    let flashOfficial: string | undefined;
+
+    if (dwrAlertActive) {
+      flashTone = dwr?.alertLevel === "critical" ? "critical" : dwr?.alertLevel === "warning" ? "warning" : "watch";
+      flashStatus = dwr?.alertLabel || "DWR แจ้งเตือน";
+      flashDetail = `${dwr?.stationId} ${dwr?.stationName} · ${dwr?.district} จ.${dwr?.province}`;
+      flashOfficial = "DWR OFFICIAL";
+    } else if (activeOfficialWarnings.length) {
       flashTone = "critical";
       flashStatus = "มีประกาศ TMD ที่เกี่ยวข้อง";
       flashDetail = activeOfficialWarnings[0].title || "พบประกาศเตือนภัยที่เกี่ยวข้องกับภาคใต้ฝั่งตะวันตก";
+      flashOfficial = "TMD OFFICIAL";
     } else if (rain3 >= 30 || rain24 >= 70) {
       flashTone = "warning";
       flashStatus = "จับตาฝนหนัก";
-      flashDetail = `แบบจำลองพบฝนสะสมสูง: 3 ชม. ${n(rain3)} มม. · 24 ชม. ${n(rain24)} มม.`;
+      flashDetail = `เกณฑ์คัดกรอง dashboard จากแบบจำลอง: 3 ชม. ${n(rain3)} มม. · 24 ชม. ${n(rain24)} มม.`;
     } else if (probability >= 70 && rain24 >= 20) {
       flashTone = "watch";
       flashStatus = "เฝ้าดูแนวโน้ม";
-      flashDetail = `โอกาสฝนสูงสุด 24 ชม. ${n(probability, 0)}% · ยังไม่พบประกาศ TMD ที่ตรงพื้นที่`;
+      flashDetail = `โอกาสฝนสูงสุด 24 ชม. ${n(probability, 0)}% · ยังไม่พบประกาศทางการที่ตรงพื้นที่`;
     }
 
-    return { floodTone, floodStatus, floodDetail, flashTone, flashStatus, flashDetail };
-  }, [data, waterCriticalCount, waterWarningCount, activeOfficialWarnings]);
+    return { floodTone, floodStatus, floodDetail, floodOfficial, flashTone, flashStatus, flashDetail, flashOfficial };
+  }, [weather, dwr, dwrAlertActive, waterCriticalCount, waterWarningCount, activeOfficialWarnings]);
 
-  const weather = data?.weather;
-  const air = data?.air;
   const updatedAt = data?.generatedAt
     ? new Date(data.generatedAt).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })
     : "—";
@@ -368,6 +441,12 @@ export function CommandCenterIntelligence({
           <div className="eci-eyebrow"><ShieldAlert size={15} /> ENVIRONMENT & HAZARD INTELLIGENCE</div>
           <h2>อากาศ ฝน PM2.5 และการเตือนภัยพื้นที่โครงการ</h2>
           <p className="eci-location"><MapPin size={14} /> พิกัดหลัก {PROJECT.lat.toFixed(6)}, {PROJECT.lon.toFixed(6)} · อัปเดต {updatedAt}</p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
+            <span className={`eci-mode ${sourceOnline("tmd-warning") ? "official" : "model"}`}>{sourceOnline("tmd-warning") ? "TMD OFFICIAL ✓" : "TMD OFFLINE"}</span>
+            <span className={`eci-mode ${sourceOnline("dwr-ews") ? "official" : "model"}`}>{sourceOnline("dwr-ews") ? "DWR OFFICIAL ✓" : "DWR OFFLINE"}</span>
+            <span className={`eci-mode ${air?.sourceType === "official" ? "official" : "model"}`}>{air?.sourceType === "official" ? "PCD OFFICIAL ✓" : "PCD FALLBACK"}</span>
+            <span className="eci-mode model">MODEL · POINT FORECAST</span>
+          </div>
         </div>
         <div className="eci-header-actions">
           {fallbackMode && <span className="eci-mode model">MODEL FALLBACK</span>}
@@ -389,6 +468,7 @@ export function CommandCenterIntelligence({
               status={risk.floodStatus}
               detail={risk.floodDetail}
               tone={risk.floodTone}
+              officialLabel={risk.floodOfficial}
               onClick={onGoToWater}
             />
             <RiskCard
@@ -397,7 +477,7 @@ export function CommandCenterIntelligence({
               status={risk.flashStatus}
               detail={risk.flashDetail}
               tone={risk.flashTone}
-              official={activeOfficialWarnings.length > 0}
+              officialLabel={risk.flashOfficial}
             />
             <RiskCard
               icon={Wind}
@@ -405,13 +485,13 @@ export function CommandCenterIntelligence({
               status={air?.aqi != null ? `${aqiLabel(air.aqi)} · AQI ${n(air.aqi, 0)}` : "รอข้อมูล AQI"}
               detail={air?.pm25 != null ? `PM2.5 ${n(air.pm25)} µg/m³ · ${air.source}` : "ยังไม่พบค่าฝุ่นจากแหล่งข้อมูลที่เชื่อมต่อ"}
               tone={air?.aqi != null && air.aqi > 150 ? "critical" : air?.aqi != null && air.aqi > 100 ? "warning" : air?.aqi != null && air.aqi > 50 ? "watch" : "normal"}
-              official={air?.sourceType === "official"}
+              officialLabel={air?.sourceType === "official" ? "PCD OFFICIAL" : undefined}
             />
           </div>
 
           <div className="eci-data-grid">
             <article className="eci-weather-card">
-              <div className="eci-card-title"><CloudSun size={18} /><div><span>สภาพอากาศ ณ จุดโครงการ</span><small>{weather?.source ?? "กำลังโหลด"} · รายพิกัด</small></div></div>
+              <div className="eci-card-title"><CloudSun size={18} /><div><span>สภาพอากาศ ณ จุดโครงการ</span><small>{weather?.source ?? "กำลังโหลด"} · MODEL รายพิกัด</small></div></div>
               <div className="eci-current-weather">
                 <div className="eci-temp"><strong>{n(weather?.current.temperature)}</strong><span>°C</span><small>{weatherLabel(weather?.current.weatherCode)}</small></div>
                 <div className="eci-mini-stats">
@@ -421,9 +501,9 @@ export function CommandCenterIntelligence({
                 </div>
               </div>
               <div className="eci-rain-strip">
+                <div><span>1 ชั่วโมง</span><strong>{n(weather?.next1hRain)} มม.</strong><small>MODEL</small></div>
                 <div><span>3 ชั่วโมง</span><strong>{n(weather?.next3hRain)} มม.</strong><small>โอกาสสูงสุด {n(weather?.next3hMaxRainProbability, 0)}%</small></div>
-                <div><span>6 ชั่วโมง</span><strong>{n(weather?.next6hRain)} มม.</strong><small>ฝนสะสมคาดการณ์</small></div>
-                <div><span>24 ชั่วโมง</span><strong>{n(weather?.next24hRain)} มม.</strong><small>โอกาสสูงสุด {n(weather?.next24hMaxRainProbability, 0)}%</small></div>
+                <div><span>6 ชั่วโมง</span><strong>{n(weather?.next6hRain)} มม.</strong><small>MODEL</small></div>
               </div>
             </article>
 
@@ -432,25 +512,61 @@ export function CommandCenterIntelligence({
               <div className="eci-official-list">
                 <div className="eci-official-item">
                   <span className={`eci-source-dot ${data?.tmd?.regionalForecast ? "online" : "offline"}`} />
-                  <div><strong>กรมอุตุนิยมวิทยา · ภาคใต้ฝั่งตะวันตก</strong><p>{data?.tmd?.regionalForecast?.summary || data?.tmd?.regionalForecast?.title || "เชื่อมต่อ RSS ทางการเมื่อรันบน Netlify"}</p></div>
+                  <div><strong>TMD OFFICIAL · ภาคใต้ฝั่งตะวันตก</strong><p>{data?.tmd?.regionalForecast?.summary || data?.tmd?.regionalForecast?.title || "ไม่สามารถอ่าน RSS ทางการในรอบนี้"}</p></div>
                 </div>
                 <div className="eci-official-item">
                   <span className={`eci-source-dot ${activeOfficialWarnings.length ? "alert" : data?.tmd?.warnings ? "online" : "offline"}`} />
-                  <div><strong>ประกาศเตือนภัย TMD</strong><p>{activeOfficialWarnings.length ? activeOfficialWarnings[0].title : "ยังไม่พบประกาศใหม่ใน feed ที่ตรงพื้นที่/ภูมิภาคภายใน 72 ชั่วโมง"}</p></div>
+                  <div><strong>TMD OFFICIAL · ประกาศเตือนภัย</strong><p>{activeOfficialWarnings.length ? activeOfficialWarnings[0].title : "ยังไม่พบประกาศใหม่ใน feed ที่ตรงพื้นที่/ภูมิภาคภายใน 72 ชั่วโมง"}</p></div>
                 </div>
                 <div className="eci-official-item">
                   <span className={`eci-source-dot ${air?.sourceType === "official" ? "online" : "offline"}`} />
-                  <div><strong>Air4Thai · กรมควบคุมมลพิษ</strong><p>{air?.sourceType === "official" ? `${air.stationName}${air.distanceKm != null ? ` · ห่างประมาณ ${n(air.distanceKm)} กม.` : ""}` : "ใช้แบบจำลองสำรองเมื่อ Air4Thai ไม่ตอบสนอง"}</p></div>
+                  <div><strong>PCD OFFICIAL · Air4Thai</strong><p>{air?.sourceType === "official" ? `${air.stationName}${air.distanceKm != null ? ` · ห่างประมาณ ${n(air.distanceKm)} กม.` : ""}` : "Air4Thai ไม่ตอบสนอง จึงใช้แบบจำลองคุณภาพอากาศเป็น fallback"}</p></div>
                 </div>
-                <a className="eci-dwr-link" href={data?.dwr?.url || "https://ews.dwr.go.th/ews/index.php?language=th"} target="_blank" rel="noreferrer">
-                  <span><strong>DWR EWS น้ำหลาก–ดินถล่ม</strong><small>เปิดหน้าระบบเตือนภัยล่วงหน้าของกรมทรัพยากรน้ำ</small></span><ExternalLink size={15} />
+                <a className="eci-dwr-link" href={dwr?.url || "https://ews.dwr.go.th/ews/index.php?language=th"} target="_blank" rel="noreferrer">
+                  <span><strong>DWR OFFICIAL · EWS น้ำหลาก–ดินถล่ม</strong><small>{sourceOnline("dwr-ews") ? `${dwr?.stationId} ${dwr?.stationName} · ${dwr?.district} จ.${dwr?.province}` : "ต้นทาง DWR ไม่ตอบสนองในรอบนี้"}</small></span><ExternalLink size={15} />
                 </a>
               </div>
             </article>
           </div>
 
+          <article className="eci-weather-card" style={{ marginTop: 16 }}>
+            <div className="eci-card-title">
+              <CloudRain size={18} />
+              <div>
+                <span>ฝนตรวจวัดจริงและสถานะ DWR EWS</span>
+                <small>{dwr?.stationId} · {dwr?.stationName} · ต.{dwr?.subdistrict} อ.{dwr?.district} จ.{dwr?.province}</small>
+              </div>
+              <span className={`eci-mode ${sourceOnline("dwr-ews") ? "official" : "model"}`} style={{ marginLeft: "auto" }}>{sourceOnline("dwr-ews") ? "DWR OFFICIAL" : "DWR UNAVAILABLE"}</span>
+            </div>
+            <div className="eci-current-weather">
+              <div className="eci-temp">
+                <strong style={{ fontSize: "1.55rem" }}>{dwr?.alertLabel || "รอข้อมูล"}</strong>
+                <small>สถานะเตือนภัยสถานี</small>
+              </div>
+              <div className="eci-mini-stats">
+                <div><CloudRain size={15} /><span>ฝน 15 นาที</span><strong>{n(dwr?.rain15m)} มม.</strong></div>
+                <div><Waves size={15} /><span>ระดับน้ำ</span><strong>{n(dwr?.waterLevel)} ม.</strong></div>
+                <div><Thermometer size={15} /><span>อุณหภูมิ</span><strong>{n(dwr?.temperature)} °C</strong></div>
+              </div>
+            </div>
+            <div className="eci-rain-strip">
+              <div><span>12 ชั่วโมง</span><strong>{n(dwr?.rain12h)} มม.</strong><small>DWR OFFICIAL · ตรวจวัด</small></div>
+              <div><span>24 ชั่วโมง</span><strong>{n(dwr?.rain24h)} มม.</strong><small>DWR OFFICIAL · รอบรายวัน</small></div>
+              <div><span>จังหวัดกระบี่</span><strong>{n(dwr?.provinceActiveStations, 0)}</strong><small>สถานีที่มีสถานการณ์เตือนภัย</small></div>
+            </div>
+            <div className="eci-rain-strip" style={{ marginTop: 10 }}>
+              <div><span>1 ชั่วโมง</span><strong>{n(weather?.next1hRain)} มม.</strong><small>MODEL · พยากรณ์รายพิกัด</small></div>
+              <div><span>3 ชั่วโมง</span><strong>{n(weather?.next3hRain)} มม.</strong><small>MODEL · พยากรณ์รายพิกัด</small></div>
+              <div><span>6 ชั่วโมง</span><strong>{n(weather?.next6hRain)} มม.</strong><small>MODEL · พยากรณ์รายพิกัด</small></div>
+            </div>
+            <p className="eci-location" style={{ marginTop: 12 }}>
+              DWR public data ให้ค่าตรวจวัด 15 นาที / 12 ชั่วโมง / รายวัน; 1/3/6 ชั่วโมงด้านบนเป็นแบบจำลองรายพิกัดและถูกติดป้าย MODEL แยกชัดเจน ไม่ใช้แทนค่าตรวจวัดทางการ
+              {dwr?.updatedAt ? ` · DWR อัปเดต ${dwr.updatedAt}` : ""}
+            </p>
+          </article>
+
           <article className="eci-forecast-card">
-            <div className="eci-forecast-title"><div><Thermometer size={18} /><span>พยากรณ์ 7 วัน ณ พิกัดโครงการ</span></div><small>ค่ารายพิกัดเป็นแบบจำลอง · ใช้ประกอบการตัดสินใจร่วมกับประกาศทางการ</small></div>
+            <div className="eci-forecast-title"><div><Thermometer size={18} /><span>พยากรณ์ 7 วัน ณ พิกัดโครงการ</span></div><small>MODEL · ใช้ประกอบการตัดสินใจร่วมกับ TMD/DWR OFFICIAL</small></div>
             <div className="eci-forecast-scroll">
               {(weather?.daily || []).slice(0, 7).map((day) => (
                 <div className="eci-day" key={day.date}>
@@ -466,7 +582,7 @@ export function CommandCenterIntelligence({
 
           <div className="eci-footnote">
             <CheckCircle2 size={15} />
-            <span><strong>หลักการแจ้งเตือน:</strong> คำว่า “เฝ้าระวัง/จับตา” เป็นเกณฑ์คัดกรองของ dashboard จากระดับน้ำและแบบจำลองฝน ไม่ใช่ประกาศภัยของราชการ; ป้าย <b>OFFICIAL</b> จะแสดงเฉพาะเมื่อพบข้อมูลจากแหล่งทางการที่เชื่อมต่อ</span>
+            <span><strong>หลักการแจ้งเตือน:</strong> `TMD OFFICIAL`, `DWR OFFICIAL`, `PCD OFFICIAL` คือข้อมูลที่อ่านจากหน่วยงานรัฐโดยตรง; `MODEL` คือพยากรณ์/แบบจำลองรายพิกัด. คำว่า “จับตา/เฝ้าระวัง” ที่ไม่มีป้ายหน่วยงานเป็นเกณฑ์คัดกรองของ dashboard ไม่ใช่ประกาศภัยราชการ</span>
           </div>
         </>
       )}
