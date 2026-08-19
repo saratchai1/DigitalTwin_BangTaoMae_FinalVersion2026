@@ -1,14 +1,14 @@
 .eci-shell {
   position: relative;
   overflow: hidden;
-  border: 1px solid var(--panel-border);
+  border: 1px solid var(--border);
   border-radius: 22px;
   padding: 22px;
   background:
     radial-gradient(circle at 10% 0%, rgba(52, 213, 244, 0.12), transparent 36%),
     radial-gradient(circle at 92% 8%, rgba(139, 124, 246, 0.1), transparent 28%),
-    var(--panel-bg);
-  box-shadow: var(--panel-shadow);
+    var(--surface);
+  box-shadow: var(--shadow);
 }
 
 .eci-shell::before {
@@ -52,7 +52,7 @@
 
 .eci-header h2 {
   margin: 6px 0 4px;
-  color: var(--text-main);
+  color: var(--text);
   font-size: clamp(18px, 2vw, 25px);
   line-height: 1.2;
   font-weight: 800;
@@ -106,14 +106,14 @@
   align-items: center;
   gap: 7px;
   padding: 0 12px;
-  border: 1px solid var(--panel-border);
+  border: 1px solid var(--border);
   color: var(--text-muted);
-  background: var(--soft-bg);
+  background: var(--bg-soft);
   cursor: pointer;
 }
 
 .eci-refresh:hover:not(:disabled) {
-  color: var(--text-main);
+  color: var(--text);
   border-color: rgba(52, 213, 244, 0.3);
 }
 
@@ -135,7 +135,7 @@
   gap: 12px;
   text-align: left;
   padding: 15px;
-  border: 1px solid var(--panel-border);
+  border: 1px solid var(--border);
   border-radius: 17px;
   background: rgba(4, 14, 27, 0.36);
   color: inherit;
@@ -187,7 +187,7 @@ button.eci-risk-card {
 
 .eci-risk-copy > strong {
   display: block;
-  color: var(--text-main);
+  color: var(--text);
   font-size: 17px;
   line-height: 1.2;
 }
@@ -209,7 +209,7 @@ button.eci-risk-card {
 .eci-weather-card,
 .eci-official-card,
 .eci-forecast-card {
-  border: 1px solid var(--panel-border);
+  border: 1px solid var(--border);
   border-radius: 17px;
   background: rgba(4, 14, 27, 0.32);
 }
@@ -231,7 +231,7 @@ button.eci-risk-card {
 }
 
 .eci-card-title span {
-  color: var(--text-main);
+  color: var(--text);
   font-size: 13px;
   font-weight: 800;
 }
@@ -258,7 +258,7 @@ button.eci-risk-card {
 }
 
 .eci-temp strong {
-  color: var(--text-main);
+  color: var(--text);
   font-size: 48px;
   line-height: 0.92;
   letter-spacing: -0.04em;
@@ -289,14 +289,14 @@ button.eci-risk-card {
   padding: 10px;
   border: 1px solid var(--grid-line);
   border-radius: 11px;
-  background: var(--soft-bg);
+  background: var(--bg-soft);
 }
 
 .eci-mini-stats svg { color: #34d5f4; }
 .eci-mini-stats span,
 .eci-mini-stats strong { display: block; }
 .eci-mini-stats span { margin: 5px 0 2px; color: var(--text-dim); font-size: 9px; }
-.eci-mini-stats strong { color: var(--text-main); font-size: 11px; }
+.eci-mini-stats strong { color: var(--text); font-size: 11px; }
 
 .eci-rain-strip {
   display: grid;
@@ -316,7 +316,7 @@ button.eci-risk-card {
 .eci-rain-strip strong,
 .eci-rain-strip small { display: block; }
 .eci-rain-strip span { color: var(--text-dim); font-size: 9px; }
-.eci-rain-strip strong { margin-top: 2px; color: var(--text-main); font-size: 15px; }
+.eci-rain-strip strong { margin-top: 2px; color: var(--text); font-size: 15px; }
 .eci-rain-strip small { margin-top: 2px; color: var(--text-dim); font-size: 8.5px; }
 
 .eci-official-list {
@@ -346,7 +346,7 @@ button.eci-risk-card {
 
 .eci-official-item strong,
 .eci-official-item p { display: block; }
-.eci-official-item strong { color: var(--text-main); font-size: 10.5px; }
+.eci-official-item strong { color: var(--text); font-size: 10.5px; }
 .eci-official-item p {
   display: -webkit-box;
   overflow: hidden;
@@ -373,7 +373,7 @@ button.eci-risk-card {
 }
 
 .eci-dwr-link span { display: flex; flex-direction: column; }
-.eci-dwr-link strong { color: var(--text-main); font-size: 10px; }
+.eci-dwr-link strong { color: var(--text); font-size: 10px; }
 .eci-dwr-link small { margin-top: 1px; color: var(--text-dim); font-size: 8.5px; }
 
 .eci-forecast-card {
@@ -396,7 +396,7 @@ button.eci-risk-card {
   color: #f3b85b;
 }
 
-.eci-forecast-title span { color: var(--text-main); font-size: 12px; font-weight: 800; }
+.eci-forecast-title span { color: var(--text); font-size: 12px; font-weight: 800; }
 .eci-forecast-title small { color: var(--text-dim); font-size: 8.5px; text-align: right; }
 
 .eci-forecast-scroll {
@@ -412,10 +412,10 @@ button.eci-risk-card {
   padding: 10px;
   border: 1px solid var(--grid-line);
   border-radius: 11px;
-  background: var(--soft-bg);
+  background: var(--bg-soft);
 }
 
-.eci-day > strong { display: block; color: var(--text-main); font-size: 10px; }
+.eci-day > strong { display: block; color: var(--text); font-size: 10px; }
 .eci-day-condition {
   display: block;
   height: 28px;
