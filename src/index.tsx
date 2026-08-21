@@ -30,6 +30,7 @@ root.render(
     <RouterProvider router={router} />
     <EnvironmentRiskTint />
     <WaterRiskBands />
+    {/* Experimental PR #5 only: overlays legacy iTwin inside the Operational Map panel. */}
     <OperationalITwinMount />
   </StrictMode>
 );
