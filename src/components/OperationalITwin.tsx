@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { ErrorBoundary } from "react-error-boundary";
 import { Viewer } from "@itwin/web-viewer-react";
 import { BrowserAuthorizationClient } from "@itwin/browser-authorization";
+import { ThemeProvider } from "@itwin/itwinui-react";
 import { Box, ExternalLink, LogIn, Map, TriangleAlert } from "lucide-react";
 import "./OperationalITwin.css";
 
@@ -113,7 +114,7 @@ function EmbeddedITwin({ onUseSchematic }: { onUseSchematic: () => void }) {
         <span><span className="itwin-operational-live" /> iTwin 3D · LEGACY MODEL</span>
         <div>
           <a
-            href={`https://connect.bentley.com/`}
+            href="https://connect.bentley.com/"
             target="_blank"
             rel="noreferrer"
             aria-label="เปิด Bentley Connect"
@@ -133,14 +134,16 @@ function EmbeddedITwin({ onUseSchematic }: { onUseSchematic: () => void }) {
           </div>
         )}
       >
-        <div className="itwin-operational-viewer">
-          <Viewer
-            iTwinId={ids.iTwinId}
-            iModelId={ids.iModelId}
-            authClient={authClient}
-            enablePerformanceMonitors={false}
-          />
-        </div>
+        <ThemeProvider>
+          <div className="itwin-operational-viewer">
+            <Viewer
+              iTwinId={ids.iTwinId}
+              iModelId={ids.iModelId}
+              authClient={authClient}
+              enablePerformanceMonitors={false}
+            />
+          </div>
+        </ThemeProvider>
       </ErrorBoundary>
       <div className="itwin-operational-model-id">
         iTwin {ids.iTwinId.slice(0, 8)}… · iModel {ids.iModelId.slice(0, 8)}…
