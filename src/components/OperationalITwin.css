@@ -1,0 +1,307 @@
+.schematic-map {
+  position: relative;
+}
+
+.itwin-operational-shell {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  overflow: hidden;
+  border-radius: inherit;
+  background: #06131a;
+  isolation: isolate;
+}
+
+.itwin-operational-viewer,
+.itwin-operational-viewer > div {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.itwin-operational-toolbar {
+  position: absolute;
+  z-index: 40;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.itwin-operational-toolbar > span,
+.itwin-operational-toolbar > div {
+  pointer-events: auto;
+}
+
+.itwin-operational-toolbar > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border: 1px solid rgba(139, 211, 228, 0.18);
+  border-radius: 999px;
+  background: rgba(4, 16, 22, 0.84);
+  backdrop-filter: blur(14px);
+  color: #dff8ff;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.24);
+}
+
+.itwin-operational-live {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #5de0ac;
+  box-shadow: 0 0 0 4px rgba(93, 224, 172, 0.12), 0 0 16px rgba(93, 224, 172, 0.45);
+}
+
+.itwin-operational-toolbar > div {
+  display: flex;
+  gap: 6px;
+}
+
+.itwin-operational-toolbar a,
+.itwin-operational-toolbar button,
+.itwin-operational-restore {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 7px 10px;
+  border: 1px solid rgba(139, 211, 228, 0.18);
+  border-radius: 9px;
+  background: rgba(4, 16, 22, 0.84);
+  backdrop-filter: blur(14px);
+  color: #c6e0e8;
+  font-size: 9px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.itwin-operational-toolbar a:hover,
+.itwin-operational-toolbar button:hover,
+.itwin-operational-restore:hover {
+  border-color: rgba(77, 229, 255, 0.42);
+  color: #4de5ff;
+}
+
+.itwin-operational-model-id {
+  position: absolute;
+  z-index: 40;
+  left: 12px;
+  bottom: 10px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  background: rgba(4, 16, 22, 0.76);
+  color: rgba(199, 224, 232, 0.68);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 8px;
+  pointer-events: none;
+}
+
+.itwin-operational-auth {
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(77, 229, 255, 0.12), transparent 34%),
+    linear-gradient(135deg, rgba(5, 22, 29, 0.96), rgba(4, 15, 21, 0.97));
+}
+
+.itwin-operational-auth-card {
+  width: min(540px, 92%);
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 14px 16px;
+  padding: 22px;
+  border: 1px solid rgba(139, 211, 228, 0.16);
+  border-radius: 18px;
+  background: rgba(9, 28, 36, 0.86);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
+}
+
+.itwin-operational-mark {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(77, 229, 255, 0.24);
+  border-radius: 14px;
+  color: #4de5ff;
+  background: rgba(77, 229, 255, 0.08);
+}
+
+.itwin-operational-eyebrow {
+  display: block;
+  margin-bottom: 5px;
+  color: #4de5ff;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.17em;
+}
+
+.itwin-operational-auth-card h3 {
+  margin: 0;
+  color: #f4fbfd;
+  font-size: 17px;
+  letter-spacing: -0.02em;
+}
+
+.itwin-operational-auth-card p {
+  margin: 7px 0 0;
+  color: #8faab4;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.itwin-operational-actions,
+.itwin-operational-error,
+.itwin-operational-auth-card > small {
+  grid-column: 1 / -1;
+}
+
+.itwin-operational-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.itwin-operational-actions button,
+.itwin-operational-fallback button {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.itwin-primary {
+  border: 1px solid rgba(77, 229, 255, 0.34);
+  background: rgba(77, 229, 255, 0.12);
+  color: #6deaff;
+}
+
+.itwin-primary:hover {
+  background: rgba(77, 229, 255, 0.18);
+}
+
+.itwin-primary:disabled {
+  opacity: 0.58;
+  cursor: wait;
+}
+
+.itwin-secondary,
+.itwin-operational-fallback button {
+  border: 1px solid rgba(139, 211, 228, 0.15);
+  background: rgba(133, 187, 205, 0.05);
+  color: #aec7cf;
+}
+
+.itwin-operational-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 9px 10px;
+  border: 1px solid rgba(255, 113, 130, 0.22);
+  border-radius: 10px;
+  background: rgba(255, 113, 130, 0.07);
+  color: #ff9aaa;
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.itwin-operational-auth-card > small {
+  color: #698690;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+.itwin-operational-fallback {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  padding: 28px;
+  text-align: center;
+  background: rgba(4, 16, 22, 0.96);
+  color: #b4cbd3;
+}
+
+.itwin-operational-fallback svg {
+  color: #f5bd64;
+}
+
+.itwin-operational-fallback strong {
+  color: #f4fbfd;
+  font-size: 14px;
+}
+
+.itwin-operational-fallback span {
+  max-width: 520px;
+  color: #829da7;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.itwin-operational-restore {
+  position: absolute;
+  z-index: 20;
+  top: 12px;
+  right: 12px;
+  border-color: rgba(77, 229, 255, 0.30);
+  color: #4de5ff;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 720px) {
+  .itwin-operational-auth {
+    padding: 14px;
+  }
+
+  .itwin-operational-auth-card {
+    grid-template-columns: 40px 1fr;
+    gap: 10px 12px;
+    padding: 16px;
+  }
+
+  .itwin-operational-mark {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+
+  .itwin-operational-toolbar {
+    top: 8px;
+    left: 8px;
+    right: 8px;
+  }
+
+  .itwin-operational-toolbar > span {
+    max-width: 60%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .itwin-operational-model-id {
+    left: 8px;
+    bottom: 8px;
+  }
+}
