@@ -6,6 +6,7 @@
 import "./index.css";
 import "./ui-overrides.css";
 import "./visual-qa.css";
+import "./dwr-fetch-bridge";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "@tanstack/react-router";
