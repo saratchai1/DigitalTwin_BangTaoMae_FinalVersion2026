@@ -1,0 +1,274 @@
+/* World-class command-center visual system
+ * Layered after index.css so the application logic and 3D interactions stay untouched.
+ */
+
+:root {
+  --bg: #041016;
+  --bg-soft: #07171e;
+  --sidebar: #06151c;
+  --surface: rgba(10, 27, 36, 0.78);
+  --surface-solid: #0a1c24;
+  --surface-hover: rgba(25, 55, 68, 0.62);
+  --border: rgba(139, 211, 228, 0.12);
+  --border-strong: rgba(139, 211, 228, 0.25);
+  --text: #f4fbfd;
+  --text-muted: #9bb4bd;
+  --text-dim: #68848e;
+  --cyan: #4de5ff;
+  --cyan-soft: rgba(77, 229, 255, 0.11);
+  --blue: #6f9dff;
+  --violet: #a493ff;
+  --green: #5de0ac;
+  --amber: #f5bd64;
+  --red: #ff7182;
+  --grid-line: rgba(159, 210, 224, 0.08);
+  --shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
+  --shadow-soft: 0 14px 40px rgba(0, 0, 0, 0.16);
+}
+
+:root[data-theme="light"] {
+  --bg: #f3f7f8;
+  --bg-soft: #edf3f5;
+  --sidebar: #fbfdfd;
+  --surface: rgba(255, 255, 255, 0.86);
+  --surface-solid: #ffffff;
+  --surface-hover: #f3f8fa;
+  --border: rgba(35, 76, 90, 0.10);
+  --border-strong: rgba(35, 76, 90, 0.18);
+  --text: #10242c;
+  --text-muted: #5e7680;
+  --text-dim: #80949c;
+  --cyan: #007f9a;
+  --cyan-soft: rgba(0, 127, 154, 0.09);
+  --green: #16815f;
+  --amber: #b97412;
+  --red: #d64f61;
+  --shadow: 0 24px 65px rgba(39, 71, 82, 0.10);
+  --shadow-soft: 0 10px 28px rgba(39, 71, 82, 0.08);
+}
+
+html, body, #root { min-width: 320px; }
+body {
+  background:
+    radial-gradient(circle at 78% -10%, rgba(77, 229, 255, 0.11), transparent 32%),
+    radial-gradient(circle at 20% 110%, rgba(111, 157, 255, 0.08), transparent 34%),
+    var(--bg);
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: .32;
+  background-image:
+    linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,.6), transparent 70%);
+}
+
+.sidebar {
+  width: 276px;
+  flex-basis: 276px;
+  padding: 26px 20px 20px;
+  background: linear-gradient(180deg, rgba(7, 24, 32, .985), rgba(4, 16, 22, .985));
+  box-shadow: 14px 0 50px rgba(0,0,0,.12);
+}
+.brand-block { gap: 14px; }
+.brand-mark {
+  width: 48px;
+  height: 48px;
+  flex-basis: 48px;
+  border-radius: 15px;
+  border-color: rgba(77,229,255,.30);
+  background: linear-gradient(145deg, rgba(77,229,255,.22), rgba(77,229,255,.035));
+  box-shadow: inset 0 0 24px rgba(77,229,255,.09), 0 8px 30px rgba(0,0,0,.16);
+}
+.brand-eyebrow { font-size: 9px; letter-spacing: .22em; }
+.brand-block h1 { margin-top: 4px; font-size: 20px; letter-spacing: -.025em; }
+.system-pill { margin-top: 26px; padding: 10px 12px; border-radius: 12px; }
+.primary-nav { margin-top: 22px; }
+.nav-label { margin-bottom: 10px; font-size: 9px; letter-spacing: .16em; text-transform: uppercase; }
+.nav-item { min-height: 48px; margin: 4px 0; border-radius: 13px; padding: 8px 10px; }
+.nav-item:hover { transform: translateX(2px); }
+.nav-item.active {
+  border-color: rgba(77,229,255,.22);
+  background: linear-gradient(90deg, rgba(77,229,255,.16), rgba(77,229,255,.035));
+  box-shadow: inset 3px 0 0 var(--cyan), 0 8px 28px rgba(0,0,0,.10);
+}
+.nav-icon { width: 34px; height: 34px; border-radius: 10px; }
+.nav-item > span:nth-child(2) { font-size: 13px; font-weight: 600; }
+.network-card { border-radius: 15px; padding: 15px; background: linear-gradient(180deg, rgba(133,187,205,.055), rgba(133,187,205,.025)); }
+.sidebar-action, .icon-button { min-height: 40px; border-radius: 11px; }
+
+.topbar {
+  min-height: 104px;
+  padding: 18px 32px;
+  background: rgba(4, 16, 22, .72);
+  backdrop-filter: blur(24px) saturate(130%);
+}
+:root[data-theme="light"] .topbar { background: rgba(243,247,248,.78); }
+.topbar-title p { margin-bottom: 5px; font-size: 9px; letter-spacing: .2em; }
+.topbar-title h2 { font-size: clamp(20px, 1.8vw, 28px); font-weight: 700; letter-spacing: -.035em; }
+.topbar-title span { margin-top: 5px; max-width: 740px; font-size: 12px; }
+.topbar-actions { gap: 11px; }
+.sync-button { min-height: 38px; border: 1px solid var(--border); border-radius: 10px; padding: 8px 11px; background: rgba(133,187,205,.035); }
+.clock-card { min-width: 112px; padding-left: 18px; }
+.clock-card strong { font-size: 16px; }
+.clock-card span { margin-top: 2px; font-size: 10px; }
+
+.page-content { gap: 28px; width: min(1660px, 100%); padding: 28px 32px 64px; }
+.metric-grid { gap: 14px; }
+.metric-card {
+  position: relative;
+  min-height: 108px;
+  gap: 14px;
+  overflow: hidden;
+  border-radius: 18px;
+  padding: 17px;
+  box-shadow: var(--shadow-soft);
+}
+.metric-card::after {
+  content: "";
+  position: absolute;
+  inset: auto -20% -85% 20%;
+  height: 110px;
+  background: radial-gradient(ellipse, rgba(77,229,255,.08), transparent 70%);
+  pointer-events: none;
+}
+.metric-card:hover { transform: translateY(-3px); box-shadow: 0 18px 48px rgba(0,0,0,.18); }
+.metric-icon { width: 42px; height: 42px; flex-basis: 42px; border-radius: 13px; }
+.metric-label { font-size: 11px; letter-spacing: .01em; }
+.metric-value { font-size: clamp(22px, 2vw, 30px); }
+.metric-unit { font-size: 10px; }
+.metric-hint { margin-top: 7px; font-size: 10px; }
+
+.panel {
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  background: linear-gradient(180deg, rgba(14,34,44,.82), rgba(9,25,33,.76));
+}
+:root[data-theme="light"] .panel { background: rgba(255,255,255,.90); }
+.section-eyebrow { margin-bottom: 6px; font-size: 9px; letter-spacing: .19em; }
+.section-heading h2 { font-size: 20px; letter-spacing: -.025em; }
+.chart-panel, .quality-panel, .environment-chart-panel, .aqi-panel, .map-panel, .alerts-panel, .station-table-panel { padding: 20px; }
+.water-hero-grid, .overview-grid, .environment-grid { gap: 18px; }
+.chart-large { height: 250px; }
+.flow-summary { margin-top: 18px; }
+.flow-summary > div { border-radius: 13px; padding: 11px 13px; background: rgba(133,187,205,.045); }
+.flow-summary strong { font-size: 18px; }
+.quality-item { min-height: 70px; border-radius: 13px; }
+.quality-footer { margin-top: 12px; padding-top: 13px; }
+
+.station-grid { gap: 18px; margin-top: 16px; }
+.water-station-card {
+  border-radius: 21px;
+  background: linear-gradient(180deg, rgba(13,34,44,.88), rgba(8,24,32,.82));
+  box-shadow: 0 22px 65px rgba(0,0,0,.18);
+  transition: 180ms ease;
+}
+:root[data-theme="light"] .water-station-card { background: rgba(255,255,255,.92); }
+.water-station-card:hover { transform: translateY(-2px); border-color: var(--border-strong); }
+.water-station-card.status-critical { box-shadow: 0 22px 65px rgba(255,113,130,.10); }
+.water-card-header { padding: 17px 18px 14px; }
+.station-code { font-size: 12px; }
+.water-card-header h3 { margin-top: 6px; font-size: 15px; }
+.status-badge { min-width: 48px; padding: 4px 8px; font-size: 9px; }
+.trend-chip { padding: 5px 8px; font-size: 9px; }
+.water-card-metrics > div { padding: 12px 18px; }
+.water-card-metrics span { font-size: 9px; }
+.water-card-metrics strong { margin-top: 4px; font-size: 18px; }
+.water-card-body { min-height: 300px; padding: 14px; }
+.featured .water-card-body { min-height: 390px; }
+.three-scene-wrap {
+  border-radius: 16px;
+  border-color: rgba(139,211,228,.16);
+  background: radial-gradient(circle at 50% 20%, #0c2732, #06151b 70%);
+  box-shadow: inset 0 0 60px rgba(77,229,255,.035);
+}
+.scene-badge { top: 11px; left: 11px; padding: 6px 9px; font-size: 8px; }
+.scene-controls { top: 10px; right: 10px; }
+.scene-controls button { width: 31px; height: 31px; border-radius: 9px; }
+.scene-legend { right: 10px; bottom: 10px; left: 10px; padding: 7px 9px; font-size: 8px; }
+.level-scale { padding-left: 16px; }
+.level-scale > p { margin-bottom: 9px; font-size: 9px; }
+.scale-row { padding: 9px 0; }
+.scale-row span { font-size: 9px; }
+.scale-row strong { font-size: 11px; }
+.capacity-block { border-radius: 12px; padding: 11px; }
+.capacity-track { height: 5px; }
+.water-card-footer { padding: 12px 18px; }
+.water-card-footer p { font-size: 9px; }
+
+.schematic-map { height: 470px; margin-top: 18px; border-radius: 16px; background-size: 42px 42px; }
+.map-station strong { font-size: 11px; }
+.map-station span { margin-top: 2px; font-size: 9px; }
+.alert-list { gap: 10px; margin-top: 19px; }
+.alert-item { grid-template-columns: 31px minmax(0,1fr) auto; border-radius: 13px; padding: 13px; }
+.alert-item strong { font-size: 11px; }
+.alert-item span { margin-top: 3px; font-size: 9px; }
+.alert-item time { font-size: 9px; }
+.panel-link { margin-top: 14px; border-radius: 11px; padding: 11px; font-size: 10px; }
+.station-row { min-height: 48px; padding: 11px 5px; font-size: 10px; }
+
+.aqi-gauge { width: 210px; height: 210px; margin-top: 30px; }
+.aqi-gauge::before { width: 170px; height: 170px; }
+.aqi-gauge strong { font-size: 48px; }
+.camera-grid { gap: 15px; }
+.camera-card { border-radius: 16px; box-shadow: var(--shadow-soft); transition: 180ms ease; }
+.camera-card:hover { transform: translateY(-2px); border-color: var(--border-strong); }
+.camera-meta { padding: 12px 13px; }
+.camera-meta strong { font-size: 10px; }
+.camera-meta span { font-size: 8px; }
+
+@media (min-width: 1440px) {
+  .metric-grid-five .metric-card { min-height: 116px; }
+  .quality-panel { min-width: 360px; }
+}
+
+@media (max-width: 1180px) {
+  .sidebar { width: 238px; flex-basis: 238px; }
+  .topbar { padding-inline: 24px; }
+  .page-content { padding-inline: 24px; }
+}
+
+@media (max-width: 900px) {
+  .sidebar { width: min(320px, 86vw); padding: 22px 18px; }
+  .topbar { min-height: 84px; padding: 12px 18px; }
+  .page-content { padding: 20px 18px 90px; }
+  .metric-card { min-height: 98px; }
+  .featured .water-card-body { min-height: 330px; }
+}
+
+@media (max-width: 640px) {
+  .topbar { min-height: 74px; padding: 10px 12px; }
+  .topbar-title h2 { font-size: 18px; }
+  .page-content { gap: 20px; padding: 14px 12px 92px; }
+  .metric-grid, .metric-grid-five { gap: 9px; }
+  .metric-card { min-height: 92px; border-radius: 15px; padding: 12px; }
+  .metric-icon { width: 34px; height: 34px; flex-basis: 34px; }
+  .metric-value { font-size: 19px; }
+  .section-heading h2 { font-size: 17px; }
+  .chart-panel, .quality-panel, .environment-chart-panel, .aqi-panel, .map-panel, .alerts-panel, .station-table-panel { padding: 15px; }
+  .water-station-card { border-radius: 17px; }
+  .water-card-header { padding: 13px; }
+  .water-card-body, .featured .water-card-body { padding: 10px; }
+  .three-scene-wrap { height: 280px; }
+  .schematic-map { height: 350px; }
+  .camera-grid { gap: 9px; }
+  .mobile-bottom-nav {
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+    border-radius: 18px;
+    padding: 6px;
+    background: rgba(7,23,30,.94);
+    box-shadow: 0 20px 60px rgba(0,0,0,.38);
+  }
+  .mobile-bottom-nav button { min-height: 48px; border-radius: 12px; font-size: 8px; }
+  .mobile-bottom-nav button.active { box-shadow: inset 0 0 0 1px rgba(77,229,255,.14); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}
