@@ -17,8 +17,12 @@ type DwrStation = {
 type DwrLiveResponse = {
   source?: string;
   sourceUrl?: string;
+  measurementUrl?: string;
   fetchedAt?: string;
-  mode?: "station-json" | "rain-daily-fallback";
+  mode?: "station-json" | "rain-daily-fallback" | "reader-relay";
+  transport?: "direct" | "relay";
+  relay?: string;
+  freshness?: { observedDate?: string | null; ageHours?: number | null; fresh?: boolean };
   rainStation?: DwrStation | null;
   area?: {
     status?: number | null;
@@ -55,6 +59,9 @@ function mergeDwr(env: any, live: DwrLiveResponse) {
 
   const status = live.area?.status ?? station.status ?? null;
   const meta = statusMeta(status);
+  const relayNote = live.transport === "relay"
+    ? " อ่านจากหน้า DWR ทางการผ่าน text relay เนื่องจากต้นทาง timeout จาก Netlify; ตรวจ freshness ก่อนแสดง"
+    : "";
   const dwr = {
     name: "EWS น้ำหลาก-ดินถล่ม · กรมทรัพยากรน้ำ",
     url: live.sourceUrl || "https://ews.dwr.go.th/ews/",
@@ -80,18 +87,20 @@ function mergeDwr(env: any, live: DwrLiveResponse) {
     note:
       live.mode === "station-json"
         ? "DWR EWS live station feed; ใช้ STN2113 บ้านคลองยาเป็นสถานีหลักของพื้นที่"
-        : "DWR EWS rain_daily fallback; ค่าฝนเป็นข้อมูลตรวจวัดทางการ แต่สถานะเตือนภัยอาจยังไม่พร้อม",
+        : live.mode === "reader-relay"
+          ? `DWR EWS rain_daily public page; ค่าฝนเป็นข้อมูลตรวจวัดทางการ.${relayNote}`
+          : "DWR EWS rain_daily fallback; ค่าฝนเป็นข้อมูลตรวจวัดทางการ แต่สถานะเตือนภัยอาจยังไม่พร้อม",
   };
 
   const sources = Array.isArray(env?.sources) ? [...env.sources] : [];
   const sourceIndex = sources.findIndex((source) => source?.id === "dwr-ews");
   const source = {
     id: "dwr-ews",
-    label: "ฝนตรวจวัดและสถานะเตือนภัย",
+    label: live.transport === "relay" ? "ฝนตรวจวัด DWR (verified relay)" : "ฝนตรวจวัดและสถานะเตือนภัย",
     agency: "กรมทรัพยากรน้ำ (DWR EWS)",
     type: "official",
     status: "online",
-    url: live.sourceUrl || "https://ews.dwr.go.th/ews/",
+    url: live.measurementUrl || live.sourceUrl || "https://ews.dwr.go.th/ews/",
   };
   if (sourceIndex >= 0) sources[sourceIndex] = { ...sources[sourceIndex], ...source };
   else sources.push(source);
@@ -117,7 +126,7 @@ globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     const merged = mergeDwr(env, live);
     const headers = new Headers(response.headers);
     headers.set("content-type", "application/json; charset=utf-8");
-    headers.set("x-bangtaomae-dwr-bridge", "live");
+    headers.set("x-bangtaomae-dwr-bridge", live.transport === "relay" ? "verified-relay" : "live");
     return new Response(JSON.stringify(merged), {
       status: response.status,
       statusText: response.statusText,
