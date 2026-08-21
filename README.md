@@ -1,20 +1,14 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Digital Twin Bang Tao Mae 2026
 
-# Run and deploy your AI Studio app
+Command-center dashboard for water, environmental monitoring and site surveillance.
 
-This contains everything you need to run your app locally.
+## Environmental & Hazard Intelligence
 
-View your app in AI Studio: https://ai.studio/apps/c5ff8819-811b-49db-9e9c-2bc0a299caa4
+The Command Center overview uses project coordinates `8.604726, 98.721682` and separates data provenance visibly:
 
-## Run Locally
+- **TMD OFFICIAL** — TMD Southern West Coast forecast, warning feed and Krabi observation.
+- **DWR OFFICIAL** — DWR EWS public station measurements for the Ao Luek / Khlong Ya locality (primary station `STN2113`), including 15-minute rain, 12-hour rain, daily rainfall, water level and station warning state when available.
+- **PCD OFFICIAL** — nearest available Air4Thai station for PM2.5/AQI, with a model fallback when the official endpoint is unavailable.
+- **MODEL** — exact-coordinate point weather forecast used for 1/3/6/24-hour outlooks and the 7-day forecast.
 
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+Dashboard screening labels such as watch/warning are intentionally kept separate from official agency warnings.
