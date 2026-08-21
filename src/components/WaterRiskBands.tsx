@@ -29,7 +29,7 @@ function paintWaterCards() {
 
   const cards = Array.from(document.querySelectorAll<HTMLElement>(".water-station-card"));
   for (const card of cards) {
-    const rows = Array.from(card.querySelectorAll<HTMLElement>(".scale-row"));
+    const rows = Array.from(card.querySelectorAll<HTMLElement>(".scale-row:not(.generated-drought-warning):not(.generated-drought-critical)"));
     if (rows.length < 5) continue;
 
     const values = rows.map((row) => parseNumber(row.querySelector("strong")?.textContent));
@@ -47,8 +47,8 @@ function paintWaterCards() {
     const bottomValue = bottom as number;
     const span = Math.max(0.001, topValue - bottomValue);
 
-    // Until project-specific drought setpoints are supplied, use conservative
-    // operational bands at 35% (watch) and 20% (critical) of usable depth.
+    // Temporary operational drought setpoints until project-approved low-water
+    // thresholds are supplied: watch at 35%, critical at 20% of usable depth.
     const lowWarning = bottomValue + span * 0.35;
     const lowCritical = bottomValue + span * 0.20;
     const position = Math.max(0, Math.min(100, ((currentValue - bottomValue) / span) * 100));
@@ -109,7 +109,8 @@ function paintWaterCards() {
       const bottomRow = rows[rows.length - 1];
       bottomRow.insertAdjacentElement("beforebegin", lowRow);
     }
-    lowRow.innerHTML = `<span>น้ำแล้ง · เฝ้าระวัง</span><strong class="warning">${lowWarning.toFixed(2)}</strong>`;
+    const lowWarningMarkup = `<span>น้ำแล้ง · เฝ้าระวัง</span><strong class="warning">${lowWarning.toFixed(2)}</strong>`;
+    if (lowRow.innerHTML !== lowWarningMarkup) lowRow.innerHTML = lowWarningMarkup;
 
     let lowCriticalRow = scale.querySelector<HTMLElement>(".scale-row.generated-drought-critical");
     if (!lowCriticalRow) {
@@ -118,31 +119,21 @@ function paintWaterCards() {
       const bottomRow = rows[rows.length - 1];
       bottomRow.insertAdjacentElement("beforebegin", lowCriticalRow);
     }
-    lowCriticalRow.innerHTML = `<span>น้ำแล้ง · วิกฤต</span><strong class="critical">${lowCritical.toFixed(2)}</strong>`;
+    const lowCriticalMarkup = `<span>น้ำแล้ง · วิกฤต</span><strong class="critical">${lowCritical.toFixed(2)}</strong>`;
+    if (lowCriticalRow.innerHTML !== lowCriticalMarkup) lowCriticalRow.innerHTML = lowCriticalMarkup;
   }
 }
 
 export function WaterRiskBands() {
   useEffect(() => {
-    let frame = 0;
-    const schedule = () => {
-      if (frame) return;
-      frame = window.requestAnimationFrame(() => {
-        frame = 0;
-        paintWaterCards();
-      });
-    };
+    const paint = () => window.requestAnimationFrame(paintWaterCards);
+    paint();
 
-    schedule();
-    const observer = new MutationObserver(schedule);
-    observer.observe(document.getElementById("root") ?? document.body, {
-      childList: true,
-      subtree: true,
-      characterData: true,
-    });
+    const timer = window.setInterval(paint, 2_000);
+    document.addEventListener("click", paint, true);
     return () => {
-      observer.disconnect();
-      if (frame) window.cancelAnimationFrame(frame);
+      window.clearInterval(timer);
+      document.removeEventListener("click", paint, true);
     };
   }, []);
   return null;
