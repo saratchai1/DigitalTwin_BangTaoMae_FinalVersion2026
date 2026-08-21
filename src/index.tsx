@@ -13,6 +13,7 @@ import { RouterProvider } from "@tanstack/react-router";
 import { router } from "./components/Routes";
 import { EnvironmentRiskTint } from "./components/EnvironmentRiskTint";
 import { WaterRiskBands } from "./components/WaterRiskBands";
+import { OperationalITwinMount } from "./components/OperationalITwin";
 
 const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("Root element not found");
@@ -29,5 +30,6 @@ root.render(
     <RouterProvider router={router} />
     <EnvironmentRiskTint />
     <WaterRiskBands />
+    <OperationalITwinMount />
   </StrictMode>
 );
