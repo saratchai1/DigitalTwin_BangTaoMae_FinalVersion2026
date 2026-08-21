@@ -1,0 +1,78 @@
+/* Dual-sided water risk semantics: upper = flood/high water, lower = drought/low water. */
+.water-station-card.status-normal,
+.water-station-card.water-risk-normal {
+  border-color: rgba(82, 214, 163, .26) !important;
+  box-shadow: inset 3px 0 0 rgba(82, 214, 163, .72), 0 18px 55px rgba(0,0,0,.14);
+}
+.water-station-card.status-warning,
+.water-station-card.water-risk-warning {
+  border-color: rgba(243, 184, 91, .42) !important;
+  box-shadow: inset 3px 0 0 rgba(243, 184, 91, .84), 0 20px 58px rgba(243,184,91,.07);
+}
+.water-station-card.status-critical,
+.water-station-card.water-risk-critical {
+  border-color: rgba(255, 102, 120, .50) !important;
+  box-shadow: inset 3px 0 0 rgba(255, 102, 120, .92), 0 22px 65px rgba(255,102,120,.10);
+}
+
+.water-risk-guide {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  margin: 2px 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: rgba(111,154,169,.045);
+  padding: 9px;
+}
+.water-risk-guide-row {
+  display: grid;
+  grid-template-columns: 64px minmax(0,1fr) 46px;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 8px;
+}
+.water-risk-guide-row > strong { color: var(--text); font: 600 9px Inter, sans-serif; text-align: right; }
+.water-risk-guide-row .risk-track {
+  position: relative;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(82,214,163,.20);
+}
+.water-risk-guide-row.flood .risk-track {
+  background: linear-gradient(90deg, rgba(82,214,163,.28) 0 58%, rgba(243,184,91,.78) 58% 78%, rgba(255,102,120,.92) 78% 100%);
+}
+.water-risk-guide-row.drought .risk-track {
+  background: linear-gradient(90deg, rgba(255,102,120,.92) 0 22%, rgba(243,184,91,.78) 22% 42%, rgba(82,214,163,.28) 42% 100%);
+}
+.water-risk-guide-row .risk-track::after {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: var(--risk-position, 50%);
+  width: 2px;
+  height: 10px;
+  border-radius: 2px;
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(5,15,20,.65), 0 0 8px rgba(255,255,255,.45);
+  transform: translateX(-1px);
+}
+.water-risk-guide-row.flood > span:first-child::before { content: "↑ "; color: var(--red); }
+.water-risk-guide-row.drought > span:first-child::before { content: "↓ "; color: var(--amber); }
+
+.scale-row.risk-divider-high,
+.scale-row.risk-divider-low { margin-top: 3px; }
+.scale-row.risk-divider-high span,
+.scale-row.risk-divider-low span { font-weight: 600; }
+.scale-row.risk-divider-high span::before { content: "↑ "; color: var(--red); }
+.scale-row.risk-divider-low span::before { content: "↓ "; color: var(--amber); }
+
+.scene-legend .normal { background: var(--green) !important; }
+.scene-legend .drought-warning { background: var(--amber) !important; }
+.scene-legend .drought-critical { background: var(--red) !important; }
+
+@media (max-width: 640px) {
+  .water-risk-guide-row { grid-template-columns: 58px minmax(0,1fr) 44px; font-size: 8px; }
+}
