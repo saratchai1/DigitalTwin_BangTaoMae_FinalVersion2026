@@ -11,8 +11,7 @@ import {
 } from "@tanstack/react-router";
 import { SignInRedirect } from "./Authorization";
 import { RootLayout } from "./RootLayout";
-import { App } from "./App";
-import "./WorldClassDashboard.css";
+import { CommandCenterV2 } from "./CommandCenterV2";
 
 const rootRoute = createRootRoute({
   component: RootLayout,
@@ -43,7 +42,7 @@ const indexRoute = createRoute({
     const { iTwinId, iModelId, changesetId } = indexRoute.useSearch();
     return (
       <div className="viewer-container">
-        <App
+        <CommandCenterV2
           iTwinId={iTwinId}
           iModelId={iModelId}
           changesetId={changesetId}
