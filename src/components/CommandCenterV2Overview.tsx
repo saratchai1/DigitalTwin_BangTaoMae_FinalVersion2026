@@ -54,14 +54,30 @@ export function OverviewPage({
     ...source,
     state: sourceDisplayState(environment, source.id, fallbackMode),
   }));
+  const stateFor = (id: string) => sourceStates.find((source) => source.id === id)?.state ?? "offline";
   const activeSourceCount = sourceStates.filter((source) => source.state === "live" || source.state === "model").length;
   const coverageScore = Math.round((activeSourceCount / SOURCE_SUMMARY.length) * 100);
   const dwrLive = isDwrLive(environment, fallbackMode);
   const dwr = dwrLive ? environment.dwr : FALLBACK_ENVIRONMENT.dwr;
+  const tmdState = stateFor("tmd-warning");
+  const airState = stateFor("air4thai");
+  const weatherState = stateFor("open-meteo");
 
   const wl01 = STATIONS[0];
   const wl03 = STATIONS[1];
   const tmdWarning = environment.tmd.warnings.find((warning) => warning.relevant && warning.fresh);
+  const tmdStatusText = tmdState === "live"
+    ? tmdWarning ? "มีประกาศ" : "ไม่พบประกาศ"
+    : sourceStateLabel(tmdState);
+  const tmdStatusClass = tmdWarning ? "danger" : tmdState === "live" ? "good" : tmdState === "offline" ? "offline" : "watch";
+  const airFootClass = airState === "live"
+    ? (environment.air.aqi ?? 0) > 150 ? "bad" : (environment.air.aqi ?? 0) > 50 ? "watch" : "good"
+    : airState === "offline" ? "bad" : "watch";
+  const decisionText = tmdWarning
+    ? `ตรวจสอบการระบายที่ WL03 และติดตาม WL08 ทุก 15 นาที พร้อมตรวจประกาศ TMD: ${tmdWarning.title}`
+    : tmdState === "live"
+      ? "ตรวจสอบการระบายที่ WL03 และติดตาม WL08 ต่อเนื่องทุก 15 นาที ขณะนี้ยังไม่พบประกาศ TMD ที่ตรงพื้นที่"
+      : "ตรวจสอบการระบายที่ WL03 และติดตาม WL08 ทุก 15 นาที พร้อมตรวจ TMD จากช่องทางสำรอง เนื่องจากต้นทางยังยืนยันสถานะไม่ได้";
 
   return (
     <>
@@ -96,12 +112,12 @@ export function OverviewPage({
           <div className="cc2-vital">
             <div className="cc2-vital-head"><span>ฝนสะสม 24 ชม.</span><CloudRain size={14} /></div>
             <div className="cc2-vital-value">{formatNumber(environment.weather.next24hRain)}<small>มม.</small></div>
-            <div className="cc2-vital-foot watch">โอกาสฝนสูงสุด {formatNumber(environment.weather.next24hMaxRainProbability, 0)}%</div>
+            <div className="cc2-vital-foot watch">{sourceStateLabel(weatherState)} · โอกาสสูงสุด {formatNumber(environment.weather.next24hMaxRainProbability, 0)}%</div>
           </div>
           <div className="cc2-vital">
             <div className="cc2-vital-head"><span>คุณภาพอากาศ</span><Wind size={14} /></div>
             <div className="cc2-vital-value">{formatNumber(environment.air.aqi, 0)}<small>AQI</small></div>
-            <div className="cc2-vital-foot good">PM2.5 {formatNumber(environment.air.pm25)} µg/m³ · {aqiLabel(environment.air.aqi)}</div>
+            <div className={`cc2-vital-foot ${airFootClass}`}>{sourceStateLabel(airState)} · PM2.5 {formatNumber(environment.air.pm25)} µg/m³ · {aqiLabel(environment.air.aqi)}</div>
           </div>
         </section>
 
@@ -117,7 +133,7 @@ export function OverviewPage({
             <div><span>ความชื้น</span><strong>{formatNumber(environment.weather.current.humidity, 0)}%</strong></div>
             <div><span>ลม</span><strong>{formatNumber(environment.weather.current.windSpeed)} กม./ชม.</strong></div>
             <div><span>ฝน 3 ชม.</span><strong>{formatNumber(environment.weather.next3hRain)} มม.</strong></div>
-            <div><span>สถานะ TMD</span><strong className={tmdWarning ? "danger" : "good"}>{tmdWarning ? "มีประกาศ" : "ปกติ"}</strong></div>
+            <div><span>สถานะ TMD</span><strong className={tmdStatusClass}>{tmdStatusText}</strong></div>
           </div>
         </section>
       </article>
@@ -181,7 +197,7 @@ export function OverviewPage({
 
             <section className="cc2-decision">
               <div className="cc2-decision-head"><strong>คำแนะนำระบบ</strong><span>ASSISTED DECISION</span></div>
-              <p>ตรวจสอบการระบายที่ WL03 และติดตาม WL08 ต่อเนื่องทุก 15 นาที ขณะนี้ยังไม่มีประกาศภัยทางการที่ตรงพื้นที่</p>
+              <p>{decisionText}</p>
               <button onClick={onOpenWater}>เปิด Operational Playbook <ChevronRight size={14} /></button>
             </section>
           </div>
