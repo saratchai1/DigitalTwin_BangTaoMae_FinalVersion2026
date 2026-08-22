@@ -57,29 +57,33 @@ export const handler = async (event, context) => {
     return baseResponse;
   }
 
-  let modelStatus = "unavailable";
-  if (!hasAirValue(payload.air)) {
-    try {
-      const modelAir = await fetchModelAir();
-      if (modelAir) {
-        payload.air = modelAir;
-        modelStatus = "online";
-      }
-    } catch {
-      modelStatus = "unavailable";
-    }
-  } else if (payload.air?.sourceType === "model") {
-    modelStatus = "online";
-  }
+  const needsAirModel = !hasAirValue(payload.air) || payload.air?.sourceType === "model";
+  if (needsAirModel) {
+    let modelStatus = payload.air?.sourceType === "model" && hasAirValue(payload.air)
+      ? "online"
+      : "unavailable";
 
-  payload.sources = upsertSource(payload.sources, {
-    id: "open-meteo-air",
-    label: "AQI / PM2.5 แบบจำลองสำรอง",
-    agency: "Open-Meteo Air Quality",
-    type: "model",
-    status: modelStatus,
-    url: AIR_MODEL_URL,
-  });
+    if (!hasAirValue(payload.air)) {
+      try {
+        const modelAir = await fetchModelAir();
+        if (modelAir) {
+          payload.air = modelAir;
+          modelStatus = "online";
+        }
+      } catch {
+        modelStatus = "unavailable";
+      }
+    }
+
+    payload.sources = upsertSource(payload.sources, {
+      id: "open-meteo-air",
+      label: "AQI / PM2.5 แบบจำลองสำรอง",
+      agency: "Open-Meteo Air Quality",
+      type: "model",
+      status: modelStatus,
+      url: AIR_MODEL_URL,
+    });
+  }
 
   return {
     ...baseResponse,
