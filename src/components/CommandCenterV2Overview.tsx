@@ -18,6 +18,7 @@ import {
   type EnvironmentData,
 } from "./CommandCenterV2Data";
 import {
+  airQualityDisplayState,
   isDwrLive,
   operationalStationStatus,
   sourceDisplayState,
@@ -88,7 +89,7 @@ export function OverviewPage({
   const dwrLive = isDwrLive(environment, fallbackMode);
   const dwr = dwrLive ? environment.dwr : FALLBACK_ENVIRONMENT.dwr;
   const tmdState = stateFor("tmd-warning");
-  const airState = stateFor("air4thai");
+  const airState = airQualityDisplayState(environment, fallbackMode);
   const weatherState = stateFor("open-meteo");
 
   const wl01 = STATIONS[0];
