@@ -40,7 +40,8 @@ export function sourceDisplayState(
   const source = environment.sources.find((entry) => entry.id === sourceId);
 
   if (source?.type === "model") {
-    return fallbackMode || source.status === "online" ? "model" : "offline";
+    if (fallbackMode) return "fallback";
+    return source.status === "online" ? "model" : "offline";
   }
   if (
     sourceId === "dwr-ews" &&
