@@ -9,6 +9,7 @@ import "./CommandCenterV2.overview.css";
 import "./CommandCenterV2.pages.css";
 import "./CommandCenterV2.responsive.css";
 import "./CommandCenterV2.status.css";
+import "./CommandCenterV2.final.css";
 
 export interface CommandCenterV2Props {
   iTwinId: string;
