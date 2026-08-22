@@ -1,6 +1,7 @@
 import { useMemo, type ReactNode } from "react";
 import { LocateFixed, ZoomIn, ZoomOut } from "lucide-react";
-import { PROJECT, STATIONS, formatNumber, stationStatus, type EnvironmentData } from "./CommandCenterV2Data";
+import { PROJECT, STATIONS, formatNumber, type EnvironmentData } from "./CommandCenterV2Data";
+import { operationalStationStatus } from "./CommandCenterV2Policy";
 
 export function StatusTag({
   tone = "neutral",
@@ -66,27 +67,27 @@ export function OperationalMap({ onOpenWater }: { onOpenWater: () => void }) {
         <path d="M526 199c-22 46-14 90 24 129" fill="none" stroke="#348fa5" strokeWidth="8" strokeLinecap="round" />
 
         <g className="cc2-map-node" transform="translate(173 134)" onClick={onOpenWater}>
-          <circle className="cc2-map-pulse" r="16" fill="#54dda8" opacity=".3" />
-          <circle r="8" fill="#07151a" stroke="#54dda8" strokeWidth="3" />
+          <circle className="cc2-map-pulse" r="16" fill="#20e68a" opacity=".35" />
+          <circle r="9" fill="#07151a" stroke="#20e68a" strokeWidth="4" />
           <text x="-24" y="-19" className="cc2-station-label">WL01</text>
           <text x="-42" y="33" className="cc2-station-sub">อ่างเก็บน้ำ · ปกติ</text>
         </g>
         <g className="cc2-map-node" transform="translate(358 188)" onClick={onOpenWater}>
-          <circle className="cc2-map-pulse" r="16" fill="#ff7487" opacity=".38" />
-          <circle r="8" fill="#07151a" stroke="#ff7487" strokeWidth="3" />
+          <circle className="cc2-map-pulse" r="19" fill="#ff3f5f" opacity=".52" />
+          <circle r="10" fill="#07151a" stroke="#ff3f5f" strokeWidth="5" />
           <text x="-19" y="-20" className="cc2-station-label">WL03</text>
-          <text x="-34" y="33" className="cc2-station-sub">กม.1+270 · วิกฤต</text>
+          <text x="-34" y="33" className="cc2-station-sub critical">กม.1+270 · วิกฤต</text>
         </g>
         <g className="cc2-map-node" transform="translate(525 199)" onClick={onOpenWater}>
-          <circle r="8" fill="#07151a" stroke="#54dda8" strokeWidth="3" />
+          <circle r="9" fill="#07151a" stroke="#20e68a" strokeWidth="4" />
           <text x="-19" y="-20" className="cc2-station-label">WL06</text>
           <text x="-33" y="33" className="cc2-station-sub">กม.4+225 · ปกติ</text>
         </g>
         <g className="cc2-map-node" transform="translate(708 229)" onClick={onOpenWater}>
-          <circle className="cc2-map-pulse" r="16" fill="#f4bc68" opacity=".28" />
-          <circle r="8" fill="#07151a" stroke="#f4bc68" strokeWidth="3" />
+          <circle className="cc2-map-pulse" r="18" fill="#ffc145" opacity=".44" />
+          <circle r="10" fill="#07151a" stroke="#ffc145" strokeWidth="5" />
           <text x="-19" y="-20" className="cc2-station-label">WL08</text>
-          <text x="-42" y="33" className="cc2-station-sub">กม.7+389 · เฝ้าระวัง</text>
+          <text x="-42" y="33" className="cc2-station-sub watch">กม.7+389 · เฝ้าระวัง</text>
         </g>
         <g transform="translate(550 328)">
           <rect x="-28" y="-18" width="56" height="36" rx="8" fill="#0d2730" stroke="#4b8794" />
@@ -184,8 +185,13 @@ export function StationTable() {
           <span>สถานะ</span>
         </div>
         {STATIONS.map((station) => {
-          const status = stationStatus(station);
+          const status = operationalStationStatus(station);
           const freeboard = station.bankLevel - station.currentLevel;
+          const statusLabel = status === "critical"
+            ? "วิกฤต"
+            : status === "warning"
+              ? station.currentLevel >= station.warningLevel ? "เฝ้าระวัง" : "ใกล้เฝ้าระวัง"
+              : "ปกติ";
           return (
             <div className="cc2-station-row" key={station.id}>
               <i className={status} />
@@ -196,9 +202,7 @@ export function StationTable() {
               <span className={station.trend === "up" ? "trend-up" : "trend-flat"}>
                 {station.trend === "up" ? "↑ เพิ่มขึ้น" : station.trend === "down" ? "↓ ลดลง" : "คงที่"}
               </span>
-              <span className={`cc2-status-badge ${status}`}>
-                {status === "critical" ? "วิกฤต" : status === "warning" ? "เฝ้าระวัง" : "ปกติ"}
-              </span>
+              <span className={`cc2-status-badge ${status}`}>{statusLabel}</span>
             </div>
           );
         })}
