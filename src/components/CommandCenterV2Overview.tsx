@@ -1,7 +1,25 @@
 import { useMemo } from "react";
 import { AlertTriangle, ChevronRight, CloudRain, CloudSun, Layers3, Waves, Wind } from "lucide-react";
-import { FALLBACK_ENVIRONMENT, STATIONS, aqiLabel, formatNumber, stationStatus, weatherLabel, type EnvironmentData } from "./CommandCenterV2Data";
+import { FALLBACK_ENVIRONMENT, STATIONS, aqiLabel, formatNumber, weatherLabel, type EnvironmentData } from "./CommandCenterV2Data";
+import {
+  isDwrLive,
+  operationalStationStatus,
+  sourceDisplayState,
+  sourceStateLabel,
+  type SourceDisplayState,
+} from "./CommandCenterV2Policy";
 import { OperationalMap, PanelHeading, RainPanel, StationTable, StatusTag } from "./CommandCenterV2Shared";
+
+const SOURCE_SUMMARY = [
+  { id: "dwr-ews", label: "DWR OFFICIAL" },
+  { id: "tmd-warning", label: "TMD OFFICIAL" },
+  { id: "air4thai", label: "PCD OFFICIAL" },
+  { id: "open-meteo", label: "POINT MODEL" },
+] as const;
+
+function sourceToneClass(state: SourceDisplayState) {
+  return state;
+}
 
 export function OverviewPage({
   environment,
@@ -13,38 +31,54 @@ export function OverviewPage({
   onOpenWater: () => void;
 }) {
   const summary = useMemo(() => {
-    const critical = STATIONS.filter((station) => stationStatus(station) === "critical").length;
-    const warning = STATIONS.filter((station) => stationStatus(station) === "warning").length;
+    const critical = STATIONS.filter((station) => operationalStationStatus(station) === "critical").length;
+    const warning = STATIONS.filter((station) => operationalStationStatus(station) === "warning").length;
     const normal = STATIONS.length - critical - warning;
-    const readiness = Math.max(0, 100 - critical * 6 - warning * 2 - (fallbackMode ? 4 : 0));
-    return { critical, warning, normal, readiness };
-  }, [fallbackMode]);
+    return { critical, warning, normal };
+  }, []);
 
-  const officialOnline = environment.sources.filter((source) => source.type === "official" && source.status === "online").length;
-  const trustScore = Math.min(100, 76 + officialOnline * 6 + (fallbackMode ? 0 : 2));
+  const situationTone = summary.critical > 0 ? "critical" : summary.warning > 0 ? "watch" : "online";
+  const situationLabel = summary.critical > 0 ? "วิกฤต" : summary.warning > 0 ? "เฝ้าระวัง" : "ปกติ";
+  const situationTitle = summary.critical > 0
+    ? "ต้องดำเนินการทันที"
+    : summary.warning > 0
+      ? "ติดตามอย่างใกล้ชิด"
+      : "ไม่มีเหตุการณ์ผิดปกติ";
+  const situationDetail = summary.critical > 0
+    ? `WL03 สูงกว่าเกณฑ์ Critical 0.04 ม. และมี ${summary.warning} จุดอยู่ในแถบเฝ้าระวัง`
+    : summary.warning > 0
+      ? `มี ${summary.warning} จุดเข้าใกล้หรือถึงเกณฑ์เฝ้าระวัง`
+      : "สถานีทั้งหมดอยู่ในช่วงปกติ";
+
+  const sourceStates = SOURCE_SUMMARY.map((source) => ({
+    ...source,
+    state: sourceDisplayState(environment, source.id, fallbackMode),
+  }));
+  const activeSourceCount = sourceStates.filter((source) => source.state === "live" || source.state === "model").length;
+  const coverageScore = Math.round((activeSourceCount / SOURCE_SUMMARY.length) * 100);
+  const dwrLive = isDwrLive(environment, fallbackMode);
+  const dwr = dwrLive ? environment.dwr : FALLBACK_ENVIRONMENT.dwr;
+
   const wl01 = STATIONS[0];
   const wl03 = STATIONS[1];
   const tmdWarning = environment.tmd.warnings.find((warning) => warning.relevant && warning.fresh);
-  const dwrSource = environment.sources.find((source) => source.id === "dwr-ews");
-  const dwrIsLive = !fallbackMode && dwrSource?.status === "online";
-  const dwr = dwrIsLive ? environment.dwr : FALLBACK_ENVIRONMENT.dwr;
 
   return (
     <>
-      <article className="cc2-mission">
+      <article className={`cc2-mission ${situationTone}`}>
         <section className="cc2-readiness">
-          <div className="cc2-state-kicker"><i /> OPERATIONAL READINESS</div>
-          <div className="cc2-state-main">
-            <div className="cc2-score">{summary.readiness}<span>%</span></div>
+          <div className={`cc2-state-kicker ${situationTone}`}><i /> SITUATION STATUS</div>
+          <div className="cc2-state-main cc2-state-main-alert">
+            <div className={`cc2-state-word ${situationTone}`}>{situationLabel}</div>
             <div className="cc2-state-copy">
-              <strong>ระบบโดยรวมพร้อมใช้งาน</strong>
-              <span>มี {summary.critical} จุดที่ต้องดำเนินการทันที<br />และ {summary.warning} จุดอยู่ในช่วงเฝ้าระวัง</span>
+              <strong>{situationTitle}</strong>
+              <span>{situationDetail}</span>
             </div>
           </div>
           <div className="cc2-state-meta">
             <StatusTag tone="critical">{summary.critical} CRITICAL</StatusTag>
             <StatusTag tone="watch">{summary.warning} WATCH</StatusTag>
-            <StatusTag tone="online">22 ONLINE</StatusTag>
+            <StatusTag tone="online">40 DEVICES ONLINE</StatusTag>
           </div>
         </section>
 
@@ -128,17 +162,17 @@ export function OverviewPage({
 
             <section className="cc2-queue">
               <div className="cc2-queue-title"><strong>เหตุการณ์ล่าสุด</strong><span>3 รายการ</span></div>
-              <div className="cc2-queue-item">
-                <i />
-                <div><strong>WL08 ใกล้ระดับเฝ้าระวัง</strong><span>เหลือระยะ 0.07 ม. ก่อนถึง Warning</span></div>
+              <div className="cc2-queue-item watch">
+                <i className="watch" />
+                <div><strong>WL08 อยู่ในแถบเฝ้าระวัง</strong><span>เหลือระยะ 0.07 ม. ก่อนถึง Warning และมีแนวโน้มเพิ่มขึ้น</span></div>
                 <time>LIVE</time>
               </div>
-              <div className="cc2-queue-item">
-                <i className={dwrIsLive ? "good" : ""} />
-                <div><strong>{dwrIsLive ? "ข้อมูล DWR รับครบตามรอบ" : "DWR ใช้ค่า DUMMY ชั่วคราว"}</strong><span>{dwr.stationId} · {dwr.stationName}</span></div>
-                <time>{dwrIsLive ? "LIVE" : "DUMMY"}</time>
+              <div className={`cc2-queue-item ${dwrLive ? "online" : "dummy"}`}>
+                <i className={dwrLive ? "good" : "watch"} />
+                <div><strong>{dwrLive ? "ข้อมูล DWR รับครบตามรอบ" : "DWR ใช้ค่า DUMMY ชั่วคราว"}</strong><span>{dwr.stationId} · {dwr.stationName}</span></div>
+                <time>{dwrLive ? "LIVE" : "DUMMY"}</time>
               </div>
-              <div className="cc2-queue-item">
+              <div className="cc2-queue-item online">
                 <i className="good" />
                 <div><strong>กล้องและเซนเซอร์ออนไลน์ครบ</strong><span>24 sensors · 16 cameras</span></div>
                 <time>LIVE</time>
@@ -158,9 +192,9 @@ export function OverviewPage({
         <RainPanel environment={environment} />
 
         <article className="cc2-panel cc2-health-panel">
-          <PanelHeading kicker="NETWORK HEALTH" title="ความพร้อมระบบ" />
+          <PanelHeading kicker="SYSTEM AVAILABILITY" title="ความพร้อมของอุปกรณ์" />
           <div className="cc2-health-ring">
-            <div><strong>{summary.readiness}%</strong><span>OPERATIONAL</span></div>
+            <div><strong>100%</strong><span>40 / 40 ONLINE</span></div>
           </div>
           <div className="cc2-health-list">
             <div className="cc2-health-row"><span>เซนเซอร์</span><strong>24 / 24</strong><div className="cc2-health-bar"><i style={{ width: "100%" }} /></div></div>
@@ -170,26 +204,18 @@ export function OverviewPage({
         </article>
 
         <article className="cc2-panel cc2-trust-panel">
-          <PanelHeading kicker="DATA TRUST" title="ความน่าเชื่อถือข้อมูล" />
-          <div className="cc2-trust-score"><strong>{trustScore}</strong><span>/ 100 · HIGH</span></div>
+          <PanelHeading kicker="SOURCE COVERAGE" title="ความครบถ้วนของข้อมูล" />
+          <div className="cc2-trust-score"><strong>{coverageScore}</strong><span>/ 100 · {activeSourceCount}/4 SOURCES</span></div>
           <div className="cc2-trust-list">
-            {[
-              { id: "dwr-ews", label: "DWR OFFICIAL", type: "official" },
-              { id: "tmd-warning", label: "TMD OFFICIAL", type: "official" },
-              { id: "air4thai", label: "PCD OFFICIAL", type: "official" },
-              { id: "open-meteo", label: "MODEL", type: "model" },
-            ].map((source) => {
-              const current = environment.sources.find((item) => item.id === source.id);
-              const live = source.id === "dwr-ews" ? dwrIsLive : current?.status === "online";
-              return (
-                <div className="cc2-trust-row" key={source.id}>
-                  <i className={source.type === "model" ? "model" : live ? "" : "offline"} />
-                  <strong>{source.label}</strong>
-                  <span>{live ? "LIVE" : source.id === "dwr-ews" ? "DUMMY" : "FALLBACK"}</span>
-                </div>
-              );
-            })}
+            {sourceStates.map((source) => (
+              <div className={`cc2-trust-row ${sourceToneClass(source.state)}`} key={source.id}>
+                <i className={sourceToneClass(source.state)} />
+                <strong>{source.label}</strong>
+                <span>{sourceStateLabel(source.state)}</span>
+              </div>
+            ))}
           </div>
+          {!dwrLive && <p className="cc2-source-explainer">DWR แสดงค่าทดสอบชั่วคราวและไม่ถูกนับเป็นแหล่งข้อมูลสด</p>}
         </article>
       </section>
 
