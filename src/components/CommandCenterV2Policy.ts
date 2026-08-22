@@ -22,6 +22,16 @@ export function operationalStationStatus(station: WaterStation): StationStatus {
   return "normal";
 }
 
+function hasDwrMeasurement(environment: EnvironmentData) {
+  return [
+    environment.dwr.rain15m,
+    environment.dwr.rain12h,
+    environment.dwr.rain24h,
+    environment.dwr.waterLevel,
+    environment.dwr.temperature,
+  ].some((value) => typeof value === "number" && Number.isFinite(value));
+}
+
 export function sourceDisplayState(
   environment: EnvironmentData,
   sourceId: string,
@@ -32,7 +42,12 @@ export function sourceDisplayState(
   if (source?.type === "model") {
     return fallbackMode || source.status === "online" ? "model" : "offline";
   }
-  if (sourceId === "dwr-ews" && (fallbackMode || source?.status !== "online")) return "dummy";
+  if (
+    sourceId === "dwr-ews" &&
+    (fallbackMode || source?.status !== "online" || !hasDwrMeasurement(environment))
+  ) {
+    return "dummy";
+  }
   if (fallbackMode) return "fallback";
   return source?.status === "online" ? "live" : "offline";
 }
