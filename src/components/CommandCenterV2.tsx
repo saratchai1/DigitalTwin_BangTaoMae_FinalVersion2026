@@ -59,10 +59,10 @@ export function CommandCenterV2(_props: CommandCenterV2Props) {
   const refreshEnvironment = useCallback(async () => {
     setRefreshing(true);
     try {
-      const response = await fetch("/.netlify/functions/environment-intelligence", {
+      const response = await fetch("/.netlify/functions/environment-intelligence-v2", {
         headers: { accept: "application/json" },
       });
-      if (!response.ok) throw new Error(`environment-intelligence ${response.status}`);
+      if (!response.ok) throw new Error(`environment-intelligence-v2 ${response.status}`);
       const payload = (await response.json()) as Partial<EnvironmentData>;
       setEnvironment(normalizeEnvironment(payload));
       setFallbackMode(false);
