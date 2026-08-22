@@ -1,17 +1,23 @@
 import { Activity, AlertTriangle, Camera, CheckCircle2, CloudRain, CloudSun, Droplets, Gauge, Radio, ShieldCheck, Video, Waves, Wind } from "lucide-react";
 import { WaterProfile3D } from "./WaterProfile3D";
-import { FALLBACK_ENVIRONMENT, STATIONS, aqiLabel, dayLabel, formatNumber, stationStatus, weatherLabel, type EnvironmentData } from "./CommandCenterV2Data";
+import { FALLBACK_ENVIRONMENT, STATIONS, aqiLabel, dayLabel, formatNumber, weatherLabel, type EnvironmentData } from "./CommandCenterV2Data";
+import {
+  isDwrLive,
+  operationalStationStatus,
+  sourceDisplayState,
+  sourceStateLabel,
+} from "./CommandCenterV2Policy";
 import { PanelHeading, RainPanel, StatusTag } from "./CommandCenterV2Shared";
 
 export function WaterPage() {
-  const critical = STATIONS.filter((station) => stationStatus(station) === "critical").length;
-  const warning = STATIONS.filter((station) => stationStatus(station) === "warning").length;
+  const critical = STATIONS.filter((station) => operationalStationStatus(station) === "critical").length;
+  const warning = STATIONS.filter((station) => operationalStationStatus(station) === "warning").length;
   return (
     <>
       <section className="cc2-kpi-grid">
         <div className="cc2-kpi"><span><Radio size={16} />สถานีทั้งหมด</span><strong>6<small>จุด</small></strong><p>ออนไลน์ครบทุกสถานี</p></div>
         <div className="cc2-kpi critical"><span><AlertTriangle size={16} />จุดวิกฤต</span><strong>{critical}<small>จุด</small></strong><p>WL03 สูงกว่าเกณฑ์ 0.04 ม.</p></div>
-        <div className="cc2-kpi watch"><span><Gauge size={16} />จุดเฝ้าระวัง</span><strong>{warning}<small>จุด</small></strong><p>WL08 เหลือ 0.07 ม.</p></div>
+        <div className="cc2-kpi watch"><span><Gauge size={16} />จุดเฝ้าระวัง</span><strong>{warning}<small>จุด</small></strong><p>WL08 เหลือ 0.07 ม. ก่อนถึง Warning</p></div>
         <div className="cc2-kpi"><span><Droplets size={16} />ระยะเผื่ออ่าง</span><strong>1.63<small>ม.</small></strong><p>WL01 อยู่ในเกณฑ์ปกติ</p></div>
       </section>
 
@@ -19,7 +25,7 @@ export function WaterPage() {
         <div>
           <p>3D WATER OPERATIONS</p>
           <h2>แบบจำลองระดับน้ำรายสถานี</h2>
-          <span>หมุน ซูม และตรวจสอบระดับปัจจุบันเทียบกับ Warning / Critical ได้โดยตรง</span>
+          <span>เขียว = ปกติ · เหลือง = เข้าใกล้/ถึงเกณฑ์เฝ้าระวัง · แดง = ถึงเกณฑ์วิกฤต</span>
         </div>
         <div className="cc2-water-legend">
           <span><i />ปกติ</span>
@@ -29,21 +35,32 @@ export function WaterPage() {
       </section>
 
       <div className="station-grid cc2-water-stations">
-        {STATIONS.map((station, index) => (
-          <WaterProfile3D key={station.id} station={station} featured={index === 0} />
-        ))}
+        {STATIONS.map((station, index) => {
+          const displayStatus = operationalStationStatus(station);
+          const isPrewarning = displayStatus === "warning" && station.currentLevel < station.warningLevel;
+          return (
+            <div className={`cc2-water-station-shell ${displayStatus}`} key={station.id}>
+              {isPrewarning && (
+                <span className="cc2-prewarning-badge">
+                  WATCH · อีก {(station.warningLevel - station.currentLevel).toFixed(2)} ม.
+                </span>
+              )}
+              <WaterProfile3D station={station} featured={index === 0} />
+            </div>
+          );
+        })}
       </div>
     </>
   );
 }
 
 export function EnvironmentPage({ environment, fallbackMode }: { environment: EnvironmentData; fallbackMode: boolean }) {
-  const dwrSource = environment.sources.find((source) => source.id === "dwr-ews");
-  const dwrIsLive = !fallbackMode && dwrSource?.status === "online";
-  const dwr = dwrIsLive ? environment.dwr : FALLBACK_ENVIRONMENT.dwr;
-  const dwrTone = dwrIsLive
+  const dwrLive = isDwrLive(environment, fallbackMode);
+  const dwr = dwrLive ? environment.dwr : FALLBACK_ENVIRONMENT.dwr;
+  const dwrTone = dwrLive
     ? (["warning", "critical"].includes(dwr.alertLevel) ? "critical" : dwr.alertLevel === "watch" ? "watch" : "online")
     : "watch";
+  const airTone = (environment.air.aqi ?? 0) > 150 ? "critical" : (environment.air.aqi ?? 0) > 50 ? "watch" : "online";
 
   return (
     <>
@@ -52,7 +69,7 @@ export function EnvironmentPage({ environment, fallbackMode }: { environment: En
           <PanelHeading
             kicker="CURRENT CONDITIONS"
             title="สภาพอากาศ ณ จุดโครงการ"
-            action={<StatusTag tone={fallbackMode ? "watch" : "online"}>{fallbackMode ? "MODEL FALLBACK" : "PUBLIC DATA LIVE"}</StatusTag>}
+            action={<StatusTag tone={fallbackMode ? "watch" : "online"}>{fallbackMode ? "LOCAL FALLBACK" : "PUBLIC DATA LIVE"}</StatusTag>}
           />
           <div className="cc2-env-current-body">
             <div className="cc2-env-temperature">
@@ -73,8 +90,8 @@ export function EnvironmentPage({ environment, fallbackMode }: { environment: En
           <PanelHeading kicker="RISK SCREENING" title="สถานะที่ต้องจับตา" />
           <div className="cc2-env-risk-list">
             <div className="cc2-env-risk-row critical"><AlertTriangle size={18} /><div><span>ระดับน้ำโครงการ</span><strong>WL03 · วิกฤต</strong><p>เกณฑ์ภายในโครงการ ไม่ใช่ประกาศภัยราชการ</p></div></div>
-            <div className={`cc2-env-risk-row ${dwrTone}`}><Waves size={18} /><div><span>DWR EWS {dwrIsLive ? "· LIVE" : "· DUMMY"}</span><strong>{dwr.alertLabel}</strong><p>{dwr.stationId} · {dwr.stationName}</p></div></div>
-            <div className="cc2-env-risk-row online"><Wind size={18} /><div><span>คุณภาพอากาศ</span><strong>{aqiLabel(environment.air.aqi)} · AQI {formatNumber(environment.air.aqi, 0)}</strong><p>PM2.5 {formatNumber(environment.air.pm25)} µg/m³</p></div></div>
+            <div className={`cc2-env-risk-row ${dwrTone}`}><Waves size={18} /><div><span>DWR EWS · {dwrLive ? "LIVE" : "DUMMY"}</span><strong>{dwr.alertLabel}</strong><p>{dwr.stationId} · {dwr.stationName}</p></div></div>
+            <div className={`cc2-env-risk-row ${airTone}`}><Wind size={18} /><div><span>คุณภาพอากาศ</span><strong>{aqiLabel(environment.air.aqi)} · AQI {formatNumber(environment.air.aqi, 0)}</strong><p>PM2.5 {formatNumber(environment.air.pm25)} µg/m³</p></div></div>
           </div>
         </article>
       </section>
@@ -85,25 +102,25 @@ export function EnvironmentPage({ environment, fallbackMode }: { environment: En
           <PanelHeading kicker="SOURCE STATUS" title="แหล่งข้อมูลที่เชื่อมต่อ" />
           <div className="cc2-official-list">
             {environment.sources.map((source) => {
-              const live = source.id === "dwr-ews" ? dwrIsLive : source.status === "online";
+              const state = sourceDisplayState(environment, source.id, fallbackMode);
               return (
-                <div className="cc2-official-row" key={source.id}>
-                  <i className={`${live ? "online" : "offline"} ${source.type === "model" ? "model" : ""}`} />
+                <div className={`cc2-official-row ${state}`} key={source.id}>
+                  <i className={state} />
                   <div><strong>{source.agency}</strong><span>{source.label}</span></div>
-                  <em>{live ? "LIVE" : source.id === "dwr-ews" ? "DUMMY" : "UNAVAILABLE"}</em>
+                  <em>{sourceStateLabel(state)}</em>
                 </div>
               );
             })}
           </div>
-          <div className="cc2-provenance-note"><ShieldCheck size={16} /><span>ข้อมูล `OFFICIAL` มาจากหน่วยงานรัฐโดยตรง ส่วน `MODEL` ใช้เพื่อการคาดการณ์รายพิกัดและไม่ใช่ประกาศภัยราชการ</span></div>
+          <div className="cc2-provenance-note"><ShieldCheck size={16} /><span>เขียว `LIVE` คือข้อมูลที่อ่านได้จากต้นทาง, เหลือง `MODEL / DUMMY / FALLBACK` ไม่ใช่ค่าตรวจวัดทางการ และแดง `OFFLINE` คือแหล่งข้อมูลที่ใช้งานไม่ได้</span></div>
         </article>
       </section>
 
-      <section className="cc2-dwr-panel cc2-panel">
+      <section className={`cc2-dwr-panel cc2-panel ${dwrLive ? "live" : "dummy"}`}>
         <PanelHeading
-          kicker={dwrIsLive ? "DWR MEASURED DATA" : "DWR TEMPORARY DUMMY DATA"}
+          kicker={dwrLive ? "DWR MEASURED DATA" : "DWR TEMPORARY DUMMY DATA"}
           title={`สถานี ${dwr.stationId} · ${dwr.stationName}`}
-          action={dwrIsLive ? <StatusTag tone={dwrTone}>{dwr.alertLabel}</StatusTag> : <span className="cc2-dummy-badge">DUMMY VALUE</span>}
+          action={dwrLive ? <StatusTag tone={dwrTone}>{dwr.alertLabel}</StatusTag> : <span className="cc2-dummy-badge">DUMMY VALUE</span>}
         />
         <div className="cc2-dwr-grid">
           <div><span>ฝน 15 นาที</span><strong>{formatNumber(dwr.rain15m)}<small>มม.</small></strong></div>
@@ -113,7 +130,7 @@ export function EnvironmentPage({ environment, fallbackMode }: { environment: En
           <div><span>อุณหภูมิ</span><strong>{formatNumber(dwr.temperature)}<small>°C</small></strong></div>
           <div><span>พื้นที่</span><strong className="location">{dwr.district}<small>จ.{dwr.province}</small></strong></div>
         </div>
-        {!dwrIsLive && <p className="cc2-dummy-note">DWR EWS ต้นทางยังดึงข้อมูลสดไม่เสถียรในรอบนี้ ค่าที่แสดงในกล่องนี้เป็น DUMMY สำหรับทดสอบ UI เท่านั้น และจะถูกแทนด้วยค่าจริงอัตโนมัติเมื่อ DWR ตอบกลับสำเร็จ</p>}
+        {!dwrLive && <p className="cc2-dummy-note">DWR EWS ต้นทางยังตอบกลับไม่เสถียร ค่าชุดนี้เป็น DUMMY สำหรับทดสอบหน้าจอเท่านั้น ระบบจะสลับเป็น `DWR MEASURED DATA · LIVE` อัตโนมัติเมื่อดึงข้อมูลจริงสำเร็จ</p>}
       </section>
 
       <section className="cc2-panel cc2-forecast-panel">
@@ -146,7 +163,7 @@ export function SurveillancePage({ now }: { now: Date }) {
 
       <section className="cc2-camera-heading">
         <div><p>LIVE CAMERA NETWORK</p><h2>ภาพจากกล้องเฝ้าระวัง</h2></div>
-        <StatusTag tone="critical">● RECORDING</StatusTag>
+        <StatusTag tone="online">● RECORDING</StatusTag>
       </section>
 
       <section className="cc2-camera-grid">
