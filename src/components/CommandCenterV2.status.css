@@ -12,6 +12,48 @@
   --cc2-status-red-border: rgba(255, 63, 95, 0.78);
 }
 
+/* Situation status is separate from equipment availability. */
+.cc2-mission.critical {
+  border-color: var(--cc2-status-red-border) !important;
+  box-shadow: inset 0 4px 0 var(--cc2-status-red), 0 18px 54px rgba(255, 63, 95, 0.10) !important;
+}
+
+.cc2-mission.watch {
+  border-color: var(--cc2-status-amber-border) !important;
+  box-shadow: inset 0 4px 0 var(--cc2-status-amber), 0 18px 54px rgba(255, 193, 69, 0.08) !important;
+}
+
+.cc2-mission.online {
+  border-color: var(--cc2-status-green-border) !important;
+  box-shadow: inset 0 4px 0 var(--cc2-status-green), var(--shadow-soft) !important;
+}
+
+.cc2-state-kicker.critical,
+.cc2-state-word.critical { color: var(--cc2-status-red) !important; }
+.cc2-state-kicker.watch,
+.cc2-state-word.watch { color: var(--cc2-status-amber) !important; }
+.cc2-state-kicker.online,
+.cc2-state-word.online { color: var(--cc2-status-green) !important; }
+
+.cc2-state-kicker.critical i { background: var(--cc2-status-red) !important; box-shadow: 0 0 0 6px rgba(255, 63, 95, 0.12), 0 0 18px rgba(255, 63, 95, 0.72) !important; }
+.cc2-state-kicker.watch i { background: var(--cc2-status-amber) !important; box-shadow: 0 0 0 6px rgba(255, 193, 69, 0.10), 0 0 18px rgba(255, 193, 69, 0.65) !important; }
+.cc2-state-kicker.online i { background: var(--cc2-status-green) !important; box-shadow: 0 0 0 6px rgba(32, 230, 138, 0.10), 0 0 18px rgba(32, 230, 138, 0.62) !important; }
+
+.cc2-state-main-alert {
+  align-items: center !important;
+  margin-top: 14px !important;
+}
+
+.cc2-state-word {
+  min-width: 112px;
+  font: 800 clamp(31px, 3vw, 48px)/0.95 "IBM Plex Sans Thai", Inter, sans-serif;
+  letter-spacing: -0.055em;
+  text-shadow: 0 0 28px color-mix(in srgb, currentColor 24%, transparent);
+}
+
+.cc2-state-copy strong { font-size: 17px !important; }
+.cc2-state-copy span { max-width: 280px; font-size: 10px !important; line-height: 1.55 !important; }
+
 /* Status chips */
 .cc2-tag.online,
 .cc2-status-badge.normal {
@@ -23,10 +65,10 @@
 
 .cc2-tag.watch,
 .cc2-status-badge.warning {
-  color: var(--cc2-status-amber) !important;
+  color: #171006 !important;
   border-color: var(--cc2-status-amber-border) !important;
-  background: var(--cc2-status-amber-bg) !important;
-  box-shadow: inset 0 0 0 1px rgba(255, 193, 69, 0.08), 0 0 18px rgba(255, 193, 69, 0.09);
+  background: var(--cc2-status-amber) !important;
+  box-shadow: 0 0 18px rgba(255, 193, 69, 0.18);
 }
 
 .cc2-tag.critical,
@@ -97,6 +139,9 @@
 .cc2-vital-foot.bad,
 .cc2-weather-grid strong.danger { color: var(--cc2-status-red) !important; font-weight: 800; }
 
+.cc2-vital-head { font-size: 9px !important; }
+.cc2-vital-foot { font-size: 9px !important; }
+
 /* Map legend and nodes */
 .cc2-map-legend i,
 .cc2-water-legend i { background: var(--cc2-status-green) !important; box-shadow: 0 0 11px rgba(32, 230, 138, 0.55); }
@@ -104,20 +149,83 @@
 .cc2-water-legend i.watch { background: var(--cc2-status-amber) !important; box-shadow: 0 0 11px rgba(255, 193, 69, 0.58); }
 .cc2-map-legend i.critical,
 .cc2-water-legend i.critical { background: var(--cc2-status-red) !important; box-shadow: 0 0 12px rgba(255, 63, 95, 0.65); }
+.cc2-station-sub.watch { fill: var(--cc2-status-amber) !important; font-weight: 800; }
+.cc2-station-sub.critical { fill: var(--cc2-status-red) !important; font-weight: 800; }
+
+/* Priority queue */
+.cc2-alert-block {
+  border-color: var(--cc2-status-red-border) !important;
+  background: linear-gradient(145deg, rgba(255, 63, 95, 0.19), rgba(255, 63, 95, 0.045)) !important;
+  box-shadow: inset 4px 0 0 var(--cc2-status-red);
+}
+
+.cc2-alert-icon { color: #fff !important; background: var(--cc2-status-red) !important; }
+.cc2-alert-copy strong { font-size: 13px !important; }
+.cc2-alert-copy span { font-size: 10px !important; }
+
+.cc2-queue-item.watch,
+.cc2-queue-item.dummy {
+  background: linear-gradient(90deg, rgba(255, 193, 69, 0.13), transparent 72%);
+}
+.cc2-queue-item.online {
+  background: linear-gradient(90deg, rgba(32, 230, 138, 0.07), transparent 72%);
+}
+.cc2-queue-item i.watch { background: var(--cc2-status-amber) !important; box-shadow: 0 0 10px rgba(255, 193, 69, 0.62); }
+.cc2-queue-item i.good { background: var(--cc2-status-green) !important; box-shadow: 0 0 10px rgba(32, 230, 138, 0.55); }
+.cc2-queue-item strong { font-size: 10px !important; }
+.cc2-queue-item span { font-size: 9px !important; }
+.cc2-queue-item.dummy time,
+.cc2-queue-item.watch time { color: var(--cc2-status-amber) !important; font-weight: 800; }
+.cc2-queue-item.online time { color: var(--cc2-status-green) !important; font-weight: 800; }
 
 /* Station table uses a full-row status tint. */
 .cc2-station-row:has(> i.normal) {
   background: linear-gradient(90deg, rgba(32, 230, 138, 0.055), transparent 42%);
 }
 .cc2-station-row:has(> i.warning) {
-  background: linear-gradient(90deg, rgba(255, 193, 69, 0.13), transparent 55%);
+  background: linear-gradient(90deg, rgba(255, 193, 69, 0.15), transparent 58%);
 }
 .cc2-station-row:has(> i.critical) {
-  background: linear-gradient(90deg, rgba(255, 63, 95, 0.16), transparent 60%);
+  background: linear-gradient(90deg, rgba(255, 63, 95, 0.18), transparent 62%);
 }
 .cc2-station-row > i.normal { background: var(--cc2-status-green) !important; box-shadow: 0 0 10px rgba(32, 230, 138, 0.55); }
 .cc2-station-row > i.warning { background: var(--cc2-status-amber) !important; box-shadow: 0 0 10px rgba(255, 193, 69, 0.60); }
 .cc2-station-row > i.critical { background: var(--cc2-status-red) !important; box-shadow: 0 0 12px rgba(255, 63, 95, 0.68); }
+
+/* Water 3D cards preserve engineering thresholds but gain a separate WATCH presentation band. */
+.cc2-water-station-shell {
+  position: relative;
+  min-width: 0;
+}
+.cc2-water-station-shell:first-child { grid-column: 1 / -1; }
+.cc2-water-station-shell .water-station-card { height: 100%; }
+.cc2-water-station-shell.normal .water-station-card { border-color: rgba(32, 230, 138, 0.34) !important; }
+.cc2-water-station-shell.warning .water-station-card {
+  border-color: var(--cc2-status-amber-border) !important;
+  box-shadow: inset 0 4px 0 var(--cc2-status-amber), 0 18px 50px rgba(255, 193, 69, 0.09) !important;
+}
+.cc2-water-station-shell.critical .water-station-card {
+  border-color: var(--cc2-status-red-border) !important;
+  box-shadow: inset 0 4px 0 var(--cc2-status-red), 0 18px 50px rgba(255, 63, 95, 0.12) !important;
+}
+.cc2-water-station-shell.warning .water-card-header .status-badge.normal { display: none !important; }
+.cc2-prewarning-badge {
+  position: absolute;
+  top: 48px;
+  right: 16px;
+  z-index: 6;
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+  padding: 0 9px;
+  border: 1px solid var(--cc2-status-amber-border);
+  border-radius: 999px;
+  color: #171006;
+  background: var(--cc2-status-amber);
+  box-shadow: 0 0 18px rgba(255, 193, 69, 0.20);
+  font: 800 8px/1 Inter, sans-serif;
+  letter-spacing: 0.06em;
+}
 
 /* Environment risk cards */
 .cc2-env-risk-row.online {
@@ -139,7 +247,72 @@
 .cc2-env-risk-row.critical > svg,
 .cc2-env-risk-row.critical strong { color: var(--cc2-status-red) !important; }
 
+/* Source status: green live, amber model/dummy/fallback, red offline. */
+.cc2-source-row.live i,
+.cc2-trust-row.live i,
+.cc2-official-row.live i { background: var(--cc2-status-green) !important; box-shadow: 0 0 10px rgba(32, 230, 138, 0.55); }
+.cc2-source-row.live em,
+.cc2-trust-row.live span,
+.cc2-official-row.live em { color: var(--cc2-status-green) !important; font-weight: 800; }
+
+.cc2-source-row.model i,
+.cc2-source-row.dummy i,
+.cc2-source-row.fallback i,
+.cc2-trust-row.model i,
+.cc2-trust-row.dummy i,
+.cc2-trust-row.fallback i,
+.cc2-official-row.model i,
+.cc2-official-row.dummy i,
+.cc2-official-row.fallback i { background: var(--cc2-status-amber) !important; box-shadow: 0 0 10px rgba(255, 193, 69, 0.58); }
+.cc2-source-row.model em,
+.cc2-source-row.dummy em,
+.cc2-source-row.fallback em,
+.cc2-trust-row.model span,
+.cc2-trust-row.dummy span,
+.cc2-trust-row.fallback span,
+.cc2-official-row.model em,
+.cc2-official-row.dummy em,
+.cc2-official-row.fallback em { color: var(--cc2-status-amber) !important; font-weight: 800; }
+
+.cc2-source-row.offline i,
+.cc2-trust-row.offline i,
+.cc2-official-row.offline i { background: var(--cc2-status-red) !important; box-shadow: 0 0 11px rgba(255, 63, 95, 0.64); }
+.cc2-source-row.offline em,
+.cc2-trust-row.offline span,
+.cc2-official-row.offline em { color: var(--cc2-status-red) !important; font-weight: 800; }
+
+.cc2-source-row,
+.cc2-trust-row,
+.cc2-official-row { font-size: 9px !important; }
+.cc2-source-row.dummy,
+.cc2-trust-row.dummy,
+.cc2-official-row.dummy { background: rgba(255, 193, 69, 0.055); }
+.cc2-source-row.offline,
+.cc2-trust-row.offline,
+.cc2-official-row.offline { background: rgba(255, 63, 95, 0.055); }
+
+.cc2-source-explainer {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border: 1px dashed rgba(255, 193, 69, 0.38);
+  border-radius: 9px;
+  color: var(--cc2-status-amber);
+  background: rgba(255, 193, 69, 0.055);
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+.cc2-sync-chip.fallback {
+  border-color: rgba(255, 193, 69, 0.45) !important;
+  color: var(--cc2-status-amber) !important;
+  background: rgba(255, 193, 69, 0.08) !important;
+}
+.cc2-sync-chip.fallback i { background: var(--cc2-status-amber) !important; box-shadow: 0 0 9px rgba(255, 193, 69, 0.58); }
+
 /* Dummy data gets a deliberately different visual language from official live data. */
+.cc2-dwr-panel.live { border-color: rgba(32, 230, 138, 0.30) !important; box-shadow: inset 0 4px 0 var(--cc2-status-green); }
+.cc2-dwr-panel.dummy { border-color: rgba(255, 193, 69, 0.55) !important; box-shadow: inset 0 4px 0 var(--cc2-status-amber); }
+
 .cc2-dummy-badge {
   display: inline-flex;
   min-height: 25px;
@@ -148,8 +321,8 @@
   padding: 0 9px;
   border: 1px dashed rgba(255, 193, 69, 0.74);
   border-radius: 999px;
-  color: var(--cc2-status-amber);
-  background: rgba(255, 193, 69, 0.10);
+  color: #171006;
+  background: var(--cc2-status-amber);
   font: 800 8px/1 Inter, sans-serif;
   letter-spacing: 0.08em;
 }
@@ -165,8 +338,16 @@
   line-height: 1.5;
 }
 
+@media (max-width: 900px) {
+  .cc2-water-station-shell:first-child { grid-column: auto; }
+}
+
 @media (max-width: 640px) {
   .cc2-kpi { border-top-width: 3px !important; }
   .cc2-kpi.watch,
   .cc2-kpi.critical { border-top-width: 4px !important; }
+  .cc2-state-word { min-width: 0; font-size: 36px; }
+  .cc2-state-main-alert { align-items: flex-start !important; flex-direction: column; gap: 9px !important; }
+  .cc2-state-copy span { max-width: none; }
+  .cc2-prewarning-badge { top: 52px; right: 12px; }
 }
