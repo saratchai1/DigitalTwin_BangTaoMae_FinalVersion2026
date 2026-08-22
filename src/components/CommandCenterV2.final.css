@@ -1,0 +1,64 @@
+/* Final readability and state polish loaded after all V2 styles. */
+
+.cc2-weather-grid strong.watch {
+  color: var(--cc2-status-amber) !important;
+  font-weight: 800;
+}
+
+.cc2-weather-grid strong.offline {
+  color: var(--cc2-status-red) !important;
+  font-weight: 800;
+}
+
+.cc2-panel-title h2 {
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.cc2-panel-title p {
+  font-size: 9px;
+  letter-spacing: 0.17em;
+}
+
+.cc2-state-meta .cc2-tag {
+  min-height: 26px;
+  padding-inline: 9px;
+  font-size: 8px;
+}
+
+.cc2-trust-score strong {
+  letter-spacing: -0.05em;
+}
+
+.cc2-source-title strong,
+.cc2-queue-title strong,
+.cc2-decision-head strong {
+  font-size: 11px;
+}
+
+.cc2-official-row strong,
+.cc2-trust-row strong,
+.cc2-source-row span {
+  font-weight: 700;
+}
+
+.cc2-source-row em,
+.cc2-official-row em,
+.cc2-trust-row span {
+  letter-spacing: 0.04em;
+}
+
+.cc2-dwr-panel.dummy .cc2-dwr-grid > div {
+  border-color: rgba(255, 193, 69, 0.24);
+  background: rgba(255, 193, 69, 0.045);
+}
+
+.cc2-dwr-panel.live .cc2-dwr-grid > div {
+  border-color: rgba(32, 230, 138, 0.20);
+}
+
+@media (max-width: 760px) {
+  .cc2-panel-title h2 { font-size: 16px; }
+  .cc2-panel-title p { font-size: 8px; }
+  .cc2-state-meta .cc2-tag { min-height: 24px; font-size: 7px; }
+}
