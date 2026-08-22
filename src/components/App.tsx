@@ -38,6 +38,7 @@ import {
   YAxis,
 } from "recharts";
 import { WaterProfile3D, type WaterStation } from "./WaterProfile3D";
+import { CommandCenterIntelligence } from "./CommandCenterIntelligence";
 
 export interface AppProps {
   iTwinId: string;
@@ -46,6 +47,8 @@ export interface AppProps {
 }
 
 type MenuKey = "overview" | "water" | "environment" | "surveillance";
+
+const PROJECT_COORDINATES = { lat: 8.604726, lon: 98.721682 } as const;
 
 const initialStations: WaterStation[] = [
   {
@@ -200,7 +203,7 @@ function SectionHeading({ eyebrow, title, action }: { eyebrow: string; title: st
 }
 
 export function App(_props: AppProps) {
-  const [activeMenu, setActiveMenu] = useState<MenuKey>("water");
+  const [activeMenu, setActiveMenu] = useState<MenuKey>("overview");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLight, setIsLight] = useState(false);
   const [now, setNow] = useState(new Date());
@@ -229,8 +232,8 @@ export function App(_props: AppProps) {
     setIsRefreshing(true);
     try {
       const [weatherResponse, airResponse] = await Promise.all([
-        fetch("https://api.open-meteo.com/v1/forecast?latitude=8.533&longitude=98.867&current=temperature_2m,relative_humidity_2m,rain,wind_speed_10m,wind_direction_10m,cloud_cover&hourly=precipitation_probability&timezone=Asia%2FBangkok"),
-        fetch("https://air-quality-api.open-meteo.com/v1/air-quality?latitude=8.533&longitude=98.867&current=us_aqi,pm2_5&timezone=Asia%2FBangkok"),
+        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${PROJECT_COORDINATES.lat}&longitude=${PROJECT_COORDINATES.lon}&current=temperature_2m,relative_humidity_2m,rain,wind_speed_10m,wind_direction_10m,cloud_cover&hourly=precipitation_probability&timezone=Asia%2FBangkok`),
+        fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${PROJECT_COORDINATES.lat}&longitude=${PROJECT_COORDINATES.lon}&current=us_aqi,pm2_5&timezone=Asia%2FBangkok`),
       ]);
       const currentWeather = weatherResponse.ok ? await weatherResponse.json() : null;
       const air = airResponse.ok ? await airResponse.json() : null;
@@ -366,10 +369,17 @@ export function App(_props: AppProps) {
             <div className="page-content">
               <section className="metric-grid">
                 <MetricCard label="ระดับอ่าง WL01" value="86.47" unit="ม.รทก." hint="ปกติ · เหลือ 1.63 ม." icon={Waves} tone="cyan" />
-                <MetricCard label="จุดเฝ้าระวัง" value="1" unit="จุด" hint="WL03 ต้องติดตาม" icon={AlertTriangle} tone="red" />
-                <MetricCard label="อุณหภูมิ" value={formatNumber(weather.temperature)} unit="°C" hint={weather.condition} icon={Thermometer} tone="amber" />
+                <MetricCard label="จุดต้องติดตาม" value={stationSummary.critical + stationSummary.warning} unit="จุด" hint={`${stationSummary.critical} วิกฤต · ${stationSummary.warning} เฝ้าระวัง`} icon={AlertTriangle} tone="red" />
+                <MetricCard label="อุณหภูมิ" value={formatNumber(weather.temperature)} unit="°C" hint={`${weather.condition} · ณ จุดโครงการ`} icon={Thermometer} tone="amber" />
                 <MetricCard label="คุณภาพอากาศ" value={formatNumber(weather.aqi, 0)} unit="AQI" hint={`PM2.5 ${formatNumber(weather.pm25)} µg/m³`} icon={Wind} tone="green" />
               </section>
+
+              <CommandCenterIntelligence
+                waterCriticalCount={stationSummary.critical}
+                waterWarningCount={stationSummary.warning}
+                onGoToWater={() => setActiveMenu("water")}
+              />
+
               <section className="overview-grid">
                 <article className="panel map-panel">
                   <SectionHeading eyebrow="OPERATIONAL MAP" title="แนวคลองและจุดตรวจวัด" action={<span className="live-chip"><span className="live-dot" /> เชื่อมต่อแล้ว</span>} />
@@ -380,15 +390,15 @@ export function App(_props: AppProps) {
                       { id: "WL06", label: "กม.4+225", left: "59%", top: "55%", status: "normal" },
                       { id: "WL08", label: "กม.7+389", left: "83%", top: "72%", status: "normal" },
                     ].map((point) => <button key={point.id} className={`map-station ${point.status}`} style={{ left: point.left, top: point.top }} onClick={() => setActiveMenu("water")}><i /><strong>{point.id}</strong><span>{point.label}</span></button>)}
-                    <div className="map-coordinate"><Navigation size={13} /> 8.533°N, 98.867°E · กระบี่</div>
+                    <div className="map-coordinate"><Navigation size={13} /> {PROJECT_COORDINATES.lat.toFixed(6)}°N, {PROJECT_COORDINATES.lon.toFixed(6)}°E · จุดอ้างอิงโครงการ</div>
                   </div>
                 </article>
                 <article className="panel alerts-panel">
                   <SectionHeading eyebrow="PRIORITY FEED" title="เหตุการณ์ที่ต้องติดตาม" />
                   <div className="alert-list">
-                    <div className="alert-item critical"><AlertTriangle size={18} /><div><strong>WL03 ระดับน้ำวิกฤต</strong><span>สูงกว่าเกณฑ์ 0.04 เมตร · ตรวจพบล่าสุด</span></div><time>13:42</time></div>
-                    <div className="alert-item warning"><CloudRain size={18} /><div><strong>โอกาสเกิดฝน 35%</strong><span>คาดการณ์ใน 3 ชั่วโมงข้างหน้า</span></div><time>13:35</time></div>
-                    <div className="alert-item normal"><CheckCircle2 size={18} /><div><strong>เซนเซอร์ออนไลน์ครบ</strong><span>24 จุดรายงานข้อมูลตามรอบ</span></div><time>13:30</time></div>
+                    <div className="alert-item critical"><AlertTriangle size={18} /><div><strong>WL03 ระดับน้ำวิกฤต</strong><span>สูงกว่าเกณฑ์ 0.04 เมตร · เป็นเกณฑ์เฝ้าระวังของโครงการ</span></div><time>LIVE</time></div>
+                    <div className="alert-item warning"><CloudRain size={18} /><div><strong>โอกาสเกิดฝน {formatNumber(weather.rainChance, 0)}%</strong><span>พยากรณ์ ณ พิกัด 8.604726, 98.721682</span></div><time>{weather.updatedAt.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}</time></div>
+                    <div className="alert-item normal"><CheckCircle2 size={18} /><div><strong>เซนเซอร์ออนไลน์ครบ</strong><span>24 จุดรายงานข้อมูลตามรอบ</span></div><time>LIVE</time></div>
                   </div>
                   <button className="panel-link" onClick={() => setActiveMenu("water")}>ดูรายละเอียดสถานการณ์น้ำ <ChevronRight size={15} /></button>
                 </article>

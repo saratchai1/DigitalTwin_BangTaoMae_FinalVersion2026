@@ -1,0 +1,103 @@
+/* Semantic environmental risk colors: green = normal, yellow = watch, red = critical. */
+.metric-card[data-env-status],
+.aqi-panel[data-env-status] {
+  --env-risk: var(--green);
+  --env-risk-soft: rgba(82, 214, 163, 0.10);
+  --env-risk-border: rgba(82, 214, 163, 0.34);
+  position: relative;
+  border-color: var(--env-risk-border) !important;
+  background:
+    linear-gradient(120deg, var(--env-risk-soft), transparent 46%),
+    var(--surface) !important;
+  box-shadow: inset 3px 0 0 var(--env-risk), var(--shadow-soft);
+}
+
+.metric-card.env-risk-warning,
+.aqi-panel.env-risk-warning {
+  --env-risk: var(--amber);
+  --env-risk-soft: rgba(243, 184, 91, 0.11);
+  --env-risk-border: rgba(243, 184, 91, 0.40);
+}
+
+.metric-card.env-risk-critical,
+.aqi-panel.env-risk-critical {
+  --env-risk: var(--red);
+  --env-risk-soft: rgba(255, 102, 120, 0.12);
+  --env-risk-border: rgba(255, 102, 120, 0.48);
+  box-shadow: inset 3px 0 0 var(--env-risk), 0 14px 42px rgba(255, 102, 120, 0.08);
+}
+
+.metric-card[data-env-status]::before,
+.aqi-panel[data-env-status]::after {
+  content: attr(data-env-status-label);
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  border: 1px solid color-mix(in srgb, var(--env-risk) 38%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--env-risk) 11%, transparent);
+  padding: 3px 8px;
+  color: var(--env-risk);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: .01em;
+}
+
+.metric-card[data-env-status] .metric-icon {
+  background: color-mix(in srgb, var(--env-risk) 12%, transparent) !important;
+  color: var(--env-risk) !important;
+}
+
+.metric-card[data-env-status] .metric-value {
+  color: var(--text);
+}
+
+.metric-card[data-env-status] .metric-hint {
+  padding-right: 34px;
+}
+
+.aqi-panel[data-env-status] {
+  --surface: rgba(10, 27, 36, 0.78);
+}
+
+.aqi-panel[data-env-status] .aqi-gauge {
+  background: conic-gradient(var(--env-risk) 0 42%, rgba(111, 154, 169, 0.1) 42% 100%) !important;
+}
+
+.aqi-panel[data-env-status] .aqi-label {
+  background: color-mix(in srgb, var(--env-risk) 10%, transparent) !important;
+  color: var(--env-risk) !important;
+}
+
+.aqi-panel.env-risk-warning .aqi-label,
+.aqi-panel.env-risk-critical .aqi-label {
+  font-size: 0;
+}
+
+.aqi-panel.env-risk-warning .aqi-label::after {
+  content: "คุณภาพอากาศต้องเฝ้าระวัง";
+  font-size: 10px;
+}
+
+.aqi-panel.env-risk-critical .aqi-label::after {
+  content: "คุณภาพอากาศอยู่ในระดับวิกฤต";
+  font-size: 10px;
+}
+
+:root[data-theme="light"] .metric-card[data-env-status],
+:root[data-theme="light"] .aqi-panel[data-env-status] {
+  background:
+    linear-gradient(120deg, color-mix(in srgb, var(--env-risk) 8%, transparent), transparent 48%),
+    rgba(255,255,255,.92) !important;
+}
+
+@media (max-width: 640px) {
+  .metric-card[data-env-status]::before { top: 8px; right: 8px; min-height: 19px; padding: 2px 6px; font-size: 8px; }
+  .metric-card[data-env-status] .metric-hint { padding-right: 0; }
+  .aqi-panel[data-env-status]::after { top: 10px; right: 10px; }
+}
