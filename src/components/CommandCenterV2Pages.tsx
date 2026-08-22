@@ -24,6 +24,7 @@ import {
   type EnvironmentData,
 } from "./CommandCenterV2Data";
 import {
+  airQualityDisplayState,
   isDwrLive,
   isPrewarningStation,
   operationalStationStatus,
@@ -114,7 +115,7 @@ export function EnvironmentPage({ environment, fallbackMode }: { environment: En
   const dwrStatusLabel = dwrLive ? dwr.alertLabel : "ยังยืนยันสถานะไม่ได้";
 
   const weatherState = sourceDisplayState(environment, "open-meteo", fallbackMode);
-  const airState = sourceDisplayState(environment, "air4thai", fallbackMode);
+  const airState = airQualityDisplayState(environment, fallbackMode);
   const airTone = airState === "offline"
     ? "critical"
     : airState === "live"
