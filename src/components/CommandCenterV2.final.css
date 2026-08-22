@@ -57,8 +57,31 @@
   border-color: rgba(32, 230, 138, 0.20);
 }
 
+/* Keep the pre-warning label outside the 3D card header so it never overlaps the trend chip. */
+.cc2-water-station-shell:has(.cc2-prewarning-badge) {
+  padding-top: 31px;
+}
+
+.cc2-water-station-shell:has(.cc2-prewarning-badge) .cc2-prewarning-badge {
+  top: 0 !important;
+  right: 0 !important;
+}
+
 @media (max-width: 760px) {
   .cc2-panel-title h2 { font-size: 16px; }
   .cc2-panel-title p { font-size: 8px; }
   .cc2-state-meta .cc2-tag { min-height: 24px; font-size: 7px; }
+}
+
+@media (max-width: 430px) {
+  /* Never hide the amber WATCH state on phones; all three colors must remain visible. */
+  .cc2-map-legend {
+    gap: 6px !important;
+    padding-inline: 7px !important;
+    font-size: 7px !important;
+  }
+
+  .cc2-map-legend span:nth-child(2) {
+    display: flex !important;
+  }
 }
