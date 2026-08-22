@@ -1,6 +1,6 @@
 import { Activity, AlertTriangle, Camera, CheckCircle2, CloudRain, CloudSun, Droplets, Gauge, Radio, ShieldCheck, Video, Waves, Wind } from "lucide-react";
 import { WaterProfile3D } from "./WaterProfile3D";
-import { STATIONS, aqiLabel, dayLabel, formatNumber, stationStatus, weatherLabel, type EnvironmentData } from "./CommandCenterV2Data";
+import { FALLBACK_ENVIRONMENT, STATIONS, aqiLabel, dayLabel, formatNumber, stationStatus, weatherLabel, type EnvironmentData } from "./CommandCenterV2Data";
 import { PanelHeading, RainPanel, StatusTag } from "./CommandCenterV2Shared";
 
 export function WaterPage() {
@@ -38,7 +38,13 @@ export function WaterPage() {
 }
 
 export function EnvironmentPage({ environment, fallbackMode }: { environment: EnvironmentData; fallbackMode: boolean }) {
-  const dwrTone = ["warning", "critical"].includes(environment.dwr.alertLevel) ? "critical" : environment.dwr.alertLevel === "watch" ? "watch" : "online";
+  const dwrSource = environment.sources.find((source) => source.id === "dwr-ews");
+  const dwrIsLive = !fallbackMode && dwrSource?.status === "online";
+  const dwr = dwrIsLive ? environment.dwr : FALLBACK_ENVIRONMENT.dwr;
+  const dwrTone = dwrIsLive
+    ? (["warning", "critical"].includes(dwr.alertLevel) ? "critical" : dwr.alertLevel === "watch" ? "watch" : "online")
+    : "watch";
+
   return (
     <>
       <section className="cc2-env-hero">
@@ -67,7 +73,7 @@ export function EnvironmentPage({ environment, fallbackMode }: { environment: En
           <PanelHeading kicker="RISK SCREENING" title="สถานะที่ต้องจับตา" />
           <div className="cc2-env-risk-list">
             <div className="cc2-env-risk-row critical"><AlertTriangle size={18} /><div><span>ระดับน้ำโครงการ</span><strong>WL03 · วิกฤต</strong><p>เกณฑ์ภายในโครงการ ไม่ใช่ประกาศภัยราชการ</p></div></div>
-            <div className={`cc2-env-risk-row ${dwrTone}`}><Waves size={18} /><div><span>DWR EWS</span><strong>{environment.dwr.alertLabel}</strong><p>{environment.dwr.stationId} · {environment.dwr.stationName}</p></div></div>
+            <div className={`cc2-env-risk-row ${dwrTone}`}><Waves size={18} /><div><span>DWR EWS {dwrIsLive ? "· LIVE" : "· DUMMY"}</span><strong>{dwr.alertLabel}</strong><p>{dwr.stationId} · {dwr.stationName}</p></div></div>
             <div className="cc2-env-risk-row online"><Wind size={18} /><div><span>คุณภาพอากาศ</span><strong>{aqiLabel(environment.air.aqi)} · AQI {formatNumber(environment.air.aqi, 0)}</strong><p>PM2.5 {formatNumber(environment.air.pm25)} µg/m³</p></div></div>
           </div>
         </article>
@@ -78,13 +84,16 @@ export function EnvironmentPage({ environment, fallbackMode }: { environment: En
         <article className="cc2-panel cc2-official-panel">
           <PanelHeading kicker="SOURCE STATUS" title="แหล่งข้อมูลที่เชื่อมต่อ" />
           <div className="cc2-official-list">
-            {environment.sources.map((source) => (
-              <div className="cc2-official-row" key={source.id}>
-                <i className={`${source.status === "online" ? "online" : "offline"} ${source.type === "model" ? "model" : ""}`} />
-                <div><strong>{source.agency}</strong><span>{source.label}</span></div>
-                <em>{source.status === "online" ? "LIVE" : "UNAVAILABLE"}</em>
-              </div>
-            ))}
+            {environment.sources.map((source) => {
+              const live = source.id === "dwr-ews" ? dwrIsLive : source.status === "online";
+              return (
+                <div className="cc2-official-row" key={source.id}>
+                  <i className={`${live ? "online" : "offline"} ${source.type === "model" ? "model" : ""}`} />
+                  <div><strong>{source.agency}</strong><span>{source.label}</span></div>
+                  <em>{live ? "LIVE" : source.id === "dwr-ews" ? "DUMMY" : "UNAVAILABLE"}</em>
+                </div>
+              );
+            })}
           </div>
           <div className="cc2-provenance-note"><ShieldCheck size={16} /><span>ข้อมูล `OFFICIAL` มาจากหน่วยงานรัฐโดยตรง ส่วน `MODEL` ใช้เพื่อการคาดการณ์รายพิกัดและไม่ใช่ประกาศภัยราชการ</span></div>
         </article>
@@ -92,18 +101,19 @@ export function EnvironmentPage({ environment, fallbackMode }: { environment: En
 
       <section className="cc2-dwr-panel cc2-panel">
         <PanelHeading
-          kicker="DWR MEASURED DATA"
-          title={`สถานี ${environment.dwr.stationId} · ${environment.dwr.stationName}`}
-          action={<StatusTag tone={dwrTone}>{environment.dwr.alertLabel}</StatusTag>}
+          kicker={dwrIsLive ? "DWR MEASURED DATA" : "DWR TEMPORARY DUMMY DATA"}
+          title={`สถานี ${dwr.stationId} · ${dwr.stationName}`}
+          action={dwrIsLive ? <StatusTag tone={dwrTone}>{dwr.alertLabel}</StatusTag> : <span className="cc2-dummy-badge">DUMMY VALUE</span>}
         />
         <div className="cc2-dwr-grid">
-          <div><span>ฝน 15 นาที</span><strong>{formatNumber(environment.dwr.rain15m)}<small>มม.</small></strong></div>
-          <div><span>ฝน 12 ชั่วโมง</span><strong>{formatNumber(environment.dwr.rain12h)}<small>มม.</small></strong></div>
-          <div><span>ฝน 24 ชั่วโมง</span><strong>{formatNumber(environment.dwr.rain24h)}<small>มม.</small></strong></div>
-          <div><span>ระดับน้ำ</span><strong>{formatNumber(environment.dwr.waterLevel)}<small>ม.</small></strong></div>
-          <div><span>อุณหภูมิ</span><strong>{formatNumber(environment.dwr.temperature)}<small>°C</small></strong></div>
-          <div><span>พื้นที่</span><strong className="location">{environment.dwr.district}<small>จ.{environment.dwr.province}</small></strong></div>
+          <div><span>ฝน 15 นาที</span><strong>{formatNumber(dwr.rain15m)}<small>มม.</small></strong></div>
+          <div><span>ฝน 12 ชั่วโมง</span><strong>{formatNumber(dwr.rain12h)}<small>มม.</small></strong></div>
+          <div><span>ฝน 24 ชั่วโมง</span><strong>{formatNumber(dwr.rain24h)}<small>มม.</small></strong></div>
+          <div><span>ระดับน้ำ</span><strong>{formatNumber(dwr.waterLevel)}<small>ม.</small></strong></div>
+          <div><span>อุณหภูมิ</span><strong>{formatNumber(dwr.temperature)}<small>°C</small></strong></div>
+          <div><span>พื้นที่</span><strong className="location">{dwr.district}<small>จ.{dwr.province}</small></strong></div>
         </div>
+        {!dwrIsLive && <p className="cc2-dummy-note">DWR EWS ต้นทางยังดึงข้อมูลสดไม่เสถียรในรอบนี้ ค่าที่แสดงในกล่องนี้เป็น DUMMY สำหรับทดสอบ UI เท่านั้น และจะถูกแทนด้วยค่าจริงอัตโนมัติเมื่อ DWR ตอบกลับสำเร็จ</p>}
       </section>
 
       <section className="cc2-panel cc2-forecast-panel">
