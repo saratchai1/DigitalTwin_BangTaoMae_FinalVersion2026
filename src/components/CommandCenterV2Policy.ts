@@ -26,10 +26,11 @@ export function operationalStationStatus(station: WaterStation): StationStatus {
 }
 
 export function isPrewarningStation(station: WaterStation) {
-  return (
-    operationalStationStatus(station) === "warning" &&
-    station.currentLevel < station.warningLevel
-  );
+  return operationalStationStatus(station) === "warning" && station.currentLevel < station.warningLevel;
+}
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
 }
 
 function hasDwrHydrologyMeasurement(environment: EnvironmentData) {
@@ -39,7 +40,7 @@ function hasDwrHydrologyMeasurement(environment: EnvironmentData) {
     environment.dwr.rain12h,
     environment.dwr.rain24h,
     environment.dwr.waterLevel,
-  ].some((value) => typeof value === "number" && Number.isFinite(value));
+  ].some(isFiniteNumber);
 
   // Temperature alone is not sufficient proof that the DWR hydrology feed was
   // parsed correctly. At least one rain/water measurement must be present.
@@ -67,6 +68,26 @@ export function sourceDisplayState(
 
   if (fallbackMode) return "fallback";
   return source?.status === "online" ? "live" : "offline";
+}
+
+/**
+ * Status of the AQI/PM values currently displayed. This can differ from the PCD
+ * source row: Air4Thai may be offline while a clearly-labelled model fallback is
+ * still available for situational awareness.
+ */
+export function airQualityDisplayState(
+  environment: EnvironmentData,
+  fallbackMode: boolean,
+): SourceDisplayState {
+  const officialState = sourceDisplayState(environment, "air4thai", fallbackMode);
+  if (officialState === "live") return "live";
+
+  const hasAirValue = [environment.air.aqi, environment.air.pm25, environment.air.pm10].some(isFiniteNumber);
+  if (!hasAirValue) return "offline";
+  if (fallbackMode || environment.air.sourceType === "fallback") return "fallback";
+  if (environment.air.sourceType === "model") return "model";
+  if (environment.air.sourceType === "dummy") return "dummy";
+  return officialState;
 }
 
 export function isDwrLive(environment: EnvironmentData, fallbackMode: boolean) {
