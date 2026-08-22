@@ -12,6 +12,7 @@ import {
 import { SignInRedirect } from "./Authorization";
 import { RootLayout } from "./RootLayout";
 import { App } from "./App";
+import "./WorldClassDashboard.css";
 
 const rootRoute = createRootRoute({
   component: RootLayout,
