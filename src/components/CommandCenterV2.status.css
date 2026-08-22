@@ -1,0 +1,172 @@
+/* High-contrast operational status layer: green = normal, amber = watch, red = critical. */
+
+:root {
+  --cc2-status-green: #20e68a;
+  --cc2-status-green-bg: rgba(32, 230, 138, 0.14);
+  --cc2-status-green-border: rgba(32, 230, 138, 0.62);
+  --cc2-status-amber: #ffc145;
+  --cc2-status-amber-bg: rgba(255, 193, 69, 0.16);
+  --cc2-status-amber-border: rgba(255, 193, 69, 0.72);
+  --cc2-status-red: #ff3f5f;
+  --cc2-status-red-bg: rgba(255, 63, 95, 0.17);
+  --cc2-status-red-border: rgba(255, 63, 95, 0.78);
+}
+
+/* Status chips */
+.cc2-tag.online,
+.cc2-status-badge.normal {
+  color: var(--cc2-status-green) !important;
+  border-color: var(--cc2-status-green-border) !important;
+  background: var(--cc2-status-green-bg) !important;
+  box-shadow: inset 0 0 0 1px rgba(32, 230, 138, 0.08), 0 0 18px rgba(32, 230, 138, 0.08);
+}
+
+.cc2-tag.watch,
+.cc2-status-badge.warning {
+  color: var(--cc2-status-amber) !important;
+  border-color: var(--cc2-status-amber-border) !important;
+  background: var(--cc2-status-amber-bg) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 193, 69, 0.08), 0 0 18px rgba(255, 193, 69, 0.09);
+}
+
+.cc2-tag.critical,
+.cc2-status-badge.critical,
+.cc2-severity {
+  color: #fff !important;
+  border-color: var(--cc2-status-red-border) !important;
+  background: var(--cc2-status-red) !important;
+  box-shadow: 0 0 22px rgba(255, 63, 95, 0.22);
+}
+
+/* KPI cards: status is visible from the whole card, not only text. */
+.cc2-kpi {
+  border-top: 3px solid var(--cc2-status-green-border) !important;
+}
+
+.cc2-kpi:not(.critical):not(.watch) > span svg,
+.cc2-kpi:not(.critical):not(.watch) > p {
+  color: var(--cc2-status-green) !important;
+}
+
+.cc2-kpi.watch {
+  border: 1px solid var(--cc2-status-amber-border) !important;
+  border-top: 4px solid var(--cc2-status-amber) !important;
+  background: linear-gradient(145deg, var(--cc2-status-amber-bg), rgba(255, 193, 69, 0.035)) !important;
+}
+
+.cc2-kpi.watch > span,
+.cc2-kpi.watch > span svg,
+.cc2-kpi.watch > p {
+  color: var(--cc2-status-amber) !important;
+}
+
+.cc2-kpi.critical {
+  border: 1px solid var(--cc2-status-red-border) !important;
+  border-top: 4px solid var(--cc2-status-red) !important;
+  background: linear-gradient(145deg, var(--cc2-status-red-bg), rgba(255, 63, 95, 0.035)) !important;
+  box-shadow: 0 16px 46px rgba(255, 63, 95, 0.10) !important;
+}
+
+.cc2-kpi.critical > span,
+.cc2-kpi.critical > span svg,
+.cc2-kpi.critical > p {
+  color: var(--cc2-status-red) !important;
+}
+
+/* Overview vitals */
+.cc2-vital:has(.cc2-vital-foot.good) {
+  border-color: rgba(32, 230, 138, 0.34) !important;
+  box-shadow: inset 0 3px 0 var(--cc2-status-green);
+}
+
+.cc2-vital:has(.cc2-vital-foot.watch) {
+  border-color: rgba(255, 193, 69, 0.52) !important;
+  background: linear-gradient(145deg, var(--cc2-status-amber-bg), rgba(125, 175, 185, 0.025)) !important;
+  box-shadow: inset 0 4px 0 var(--cc2-status-amber);
+}
+
+.cc2-vital:has(.cc2-vital-foot.bad) {
+  border-color: rgba(255, 63, 95, 0.62) !important;
+  background: linear-gradient(145deg, var(--cc2-status-red-bg), rgba(125, 175, 185, 0.025)) !important;
+  box-shadow: inset 0 4px 0 var(--cc2-status-red), 0 12px 30px rgba(255, 63, 95, 0.08);
+}
+
+.cc2-vital-foot.good,
+.cc2-weather-grid strong.good { color: var(--cc2-status-green) !important; font-weight: 800; }
+.cc2-vital-foot.watch { color: var(--cc2-status-amber) !important; font-weight: 800; }
+.cc2-vital-foot.bad,
+.cc2-weather-grid strong.danger { color: var(--cc2-status-red) !important; font-weight: 800; }
+
+/* Map legend and nodes */
+.cc2-map-legend i,
+.cc2-water-legend i { background: var(--cc2-status-green) !important; box-shadow: 0 0 11px rgba(32, 230, 138, 0.55); }
+.cc2-map-legend i.watch,
+.cc2-water-legend i.watch { background: var(--cc2-status-amber) !important; box-shadow: 0 0 11px rgba(255, 193, 69, 0.58); }
+.cc2-map-legend i.critical,
+.cc2-water-legend i.critical { background: var(--cc2-status-red) !important; box-shadow: 0 0 12px rgba(255, 63, 95, 0.65); }
+
+/* Station table uses a full-row status tint. */
+.cc2-station-row:has(> i.normal) {
+  background: linear-gradient(90deg, rgba(32, 230, 138, 0.055), transparent 42%);
+}
+.cc2-station-row:has(> i.warning) {
+  background: linear-gradient(90deg, rgba(255, 193, 69, 0.13), transparent 55%);
+}
+.cc2-station-row:has(> i.critical) {
+  background: linear-gradient(90deg, rgba(255, 63, 95, 0.16), transparent 60%);
+}
+.cc2-station-row > i.normal { background: var(--cc2-status-green) !important; box-shadow: 0 0 10px rgba(32, 230, 138, 0.55); }
+.cc2-station-row > i.warning { background: var(--cc2-status-amber) !important; box-shadow: 0 0 10px rgba(255, 193, 69, 0.60); }
+.cc2-station-row > i.critical { background: var(--cc2-status-red) !important; box-shadow: 0 0 12px rgba(255, 63, 95, 0.68); }
+
+/* Environment risk cards */
+.cc2-env-risk-row.online {
+  border-color: var(--cc2-status-green-border) !important;
+  background: var(--cc2-status-green-bg) !important;
+}
+.cc2-env-risk-row.online > svg,
+.cc2-env-risk-row.online strong { color: var(--cc2-status-green) !important; }
+.cc2-env-risk-row.watch {
+  border-color: var(--cc2-status-amber-border) !important;
+  background: var(--cc2-status-amber-bg) !important;
+}
+.cc2-env-risk-row.watch > svg,
+.cc2-env-risk-row.watch strong { color: var(--cc2-status-amber) !important; }
+.cc2-env-risk-row.critical {
+  border-color: var(--cc2-status-red-border) !important;
+  background: var(--cc2-status-red-bg) !important;
+}
+.cc2-env-risk-row.critical > svg,
+.cc2-env-risk-row.critical strong { color: var(--cc2-status-red) !important; }
+
+/* Dummy data gets a deliberately different visual language from official live data. */
+.cc2-dummy-badge {
+  display: inline-flex;
+  min-height: 25px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 9px;
+  border: 1px dashed rgba(255, 193, 69, 0.74);
+  border-radius: 999px;
+  color: var(--cc2-status-amber);
+  background: rgba(255, 193, 69, 0.10);
+  font: 800 8px/1 Inter, sans-serif;
+  letter-spacing: 0.08em;
+}
+
+.cc2-dummy-note {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border: 1px dashed rgba(255, 193, 69, 0.45);
+  border-radius: 11px;
+  color: var(--cc2-status-amber);
+  background: rgba(255, 193, 69, 0.065);
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .cc2-kpi { border-top-width: 3px !important; }
+  .cc2-kpi.watch,
+  .cc2-kpi.critical { border-top-width: 4px !important; }
+}
