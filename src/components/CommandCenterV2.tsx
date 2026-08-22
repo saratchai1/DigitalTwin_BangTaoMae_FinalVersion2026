@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Activity, Camera, ChevronRight, Leaf, LayoutDashboard, Menu, Moon, MoreHorizontal, RefreshCw, Sun, Waves, X } from "lucide-react";
 import { FALLBACK_ENVIRONMENT, PAGE_META, normalizeEnvironment, type EnvironmentData, type MenuKey } from "./CommandCenterV2Data";
+import { sourceDisplayState, sourceStateLabel } from "./CommandCenterV2Policy";
 import { OverviewPage } from "./CommandCenterV2Overview";
 import { EnvironmentPage, SurveillancePage, WaterPage } from "./CommandCenterV2Pages";
 import "./CommandCenterV2.core.css";
@@ -27,6 +28,13 @@ const MENU_ITEMS: Array<{
   { key: "environment", label: "สิ่งแวดล้อม", caption: "Weather & hazards", shortLabel: "สิ่งแวดล้อม", icon: Leaf },
   { key: "surveillance", label: "กล้องเฝ้าระวัง", caption: "16 live feeds", shortLabel: "กล้อง", icon: Camera },
 ];
+
+const SOURCE_ITEMS = [
+  { id: "dwr-ews", label: "DWR · น้ำและฝน" },
+  { id: "tmd-warning", label: "TMD · ประกาศเตือน" },
+  { id: "air4thai", label: "PCD · คุณภาพอากาศ" },
+  { id: "open-meteo", label: "Point forecast" },
+] as const;
 
 export function CommandCenterV2(_props: CommandCenterV2Props) {
   const [activeMenu, setActiveMenu] = useState<MenuKey>("overview");
@@ -72,8 +80,16 @@ export function CommandCenterV2(_props: CommandCenterV2Props) {
   }, [refreshEnvironment]);
 
   const page = PAGE_META[activeMenu];
-  const dwrSource = environment.sources.find((source) => source.id === "dwr-ews");
-  const dwrIsLive = !fallbackMode && dwrSource?.status === "online";
+  const sourceStates = SOURCE_ITEMS.map((source) => ({
+    ...source,
+    state: sourceDisplayState(environment, source.id, fallbackMode),
+  }));
+  const hasSourceIssue = sourceStates.some((source) => ["dummy", "fallback", "offline"].includes(source.state));
+  const syncText = fallbackMode
+    ? "ข้อมูลสำรองในเครื่อง"
+    : hasSourceIssue
+      ? "ข้อมูลสดบางส่วน · ตรวจ Source Status"
+      : `ข้อมูลล่าสุด ${new Date(environment.generatedAt).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}`;
 
   const navigate = (key: MenuKey) => {
     setActiveMenu(key);
@@ -92,7 +108,7 @@ export function CommandCenterV2(_props: CommandCenterV2Props) {
           <button className="cc2-close" onClick={() => setMobileMenuOpen(false)} aria-label="ปิดเมนู"><X size={19} /></button>
         </div>
 
-        <div className="cc2-online-pill"><i /> ระบบปฏิบัติการออนไลน์ <strong>24 / 24</strong></div>
+        <div className="cc2-online-pill"><i /> ระบบอุปกรณ์ออนไลน์ <strong>40 / 40</strong></div>
 
         <nav className="cc2-nav" aria-label="เมนูหลัก">
           <p>MISSION CONTROL</p>
@@ -111,23 +127,14 @@ export function CommandCenterV2(_props: CommandCenterV2Props) {
         <div className="cc2-rail-spacer" />
 
         <section className="cc2-source-card">
-          <div className="cc2-source-title"><strong>Data provenance</strong><span>VERIFIED</span></div>
-          {[
-            { id: "dwr-ews", label: "DWR · น้ำและฝน", type: "official" },
-            { id: "tmd-warning", label: "TMD · ประกาศเตือน", type: "official" },
-            { id: "air4thai", label: "PCD · คุณภาพอากาศ", type: "official" },
-            { id: "open-meteo", label: "Point forecast", type: "model" },
-          ].map((source) => {
-            const item = environment.sources.find((entry) => entry.id === source.id);
-            const live = source.id === "dwr-ews" ? dwrIsLive : item?.status === "online";
-            return (
-              <div className="cc2-source-row" key={source.id}>
-                <i className={source.type === "model" ? "model" : live ? "" : "offline"} />
-                <span>{source.label}</span>
-                <em>{live ? "LIVE" : source.id === "dwr-ews" ? "DUMMY" : "FALLBACK"}</em>
-              </div>
-            );
-          })}
+          <div className="cc2-source-title"><strong>Source status</strong><span>4 SOURCES</span></div>
+          {sourceStates.map((source) => (
+            <div className={`cc2-source-row ${source.state}`} key={source.id}>
+              <i className={source.state} />
+              <span>{source.label}</span>
+              <em>{sourceStateLabel(source.state)}</em>
+            </div>
+          ))}
         </section>
 
         <div className="cc2-rail-actions">
@@ -148,7 +155,7 @@ export function CommandCenterV2(_props: CommandCenterV2Props) {
           </div>
           <div className="cc2-topbar-actions">
             {simulation && <span className="cc2-simulation-badge"><Activity size={13} /> SIMULATION</span>}
-            <div className={`cc2-sync-chip ${fallbackMode ? "fallback" : ""}`}><i /> {fallbackMode ? "ข้อมูลสำรองในเครื่อง" : `ข้อมูลล่าสุด ${new Date(environment.generatedAt).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}`}</div>
+            <div className={`cc2-sync-chip ${fallbackMode || hasSourceIssue ? "fallback" : ""}`}><i /> {syncText}</div>
             <button className="cc2-icon-button" onClick={() => void refreshEnvironment()} disabled={refreshing} aria-label="อัปเดตข้อมูล"><RefreshCw size={16} className={refreshing ? "spin" : ""} /></button>
             <button className="cc2-icon-button cc2-theme-button" onClick={() => setIsLight((current) => !current)} aria-label={isLight ? "เปลี่ยนเป็นโหมดมืด" : "เปลี่ยนเป็นโหมดสว่าง"}>{isLight ? <Moon size={16} /> : <Sun size={16} />}</button>
             <div className="cc2-clock"><strong>{now.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</strong><span>{now.toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" })}</span></div>
