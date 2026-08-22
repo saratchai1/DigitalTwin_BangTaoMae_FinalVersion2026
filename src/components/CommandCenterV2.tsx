@@ -7,6 +7,7 @@ import "./CommandCenterV2.core.css";
 import "./CommandCenterV2.overview.css";
 import "./CommandCenterV2.pages.css";
 import "./CommandCenterV2.responsive.css";
+import "./CommandCenterV2.status.css";
 
 export interface CommandCenterV2Props {
   iTwinId: string;
@@ -71,6 +72,8 @@ export function CommandCenterV2(_props: CommandCenterV2Props) {
   }, [refreshEnvironment]);
 
   const page = PAGE_META[activeMenu];
+  const dwrSource = environment.sources.find((source) => source.id === "dwr-ews");
+  const dwrIsLive = !fallbackMode && dwrSource?.status === "online";
 
   const navigate = (key: MenuKey) => {
     setActiveMenu(key);
@@ -116,11 +119,12 @@ export function CommandCenterV2(_props: CommandCenterV2Props) {
             { id: "open-meteo", label: "Point forecast", type: "model" },
           ].map((source) => {
             const item = environment.sources.find((entry) => entry.id === source.id);
+            const live = source.id === "dwr-ews" ? dwrIsLive : item?.status === "online";
             return (
               <div className="cc2-source-row" key={source.id}>
-                <i className={source.type === "model" ? "model" : item?.status === "online" ? "" : "offline"} />
+                <i className={source.type === "model" ? "model" : live ? "" : "offline"} />
                 <span>{source.label}</span>
-                <em>{item?.status === "online" ? "LIVE" : "FALLBACK"}</em>
+                <em>{live ? "LIVE" : source.id === "dwr-ews" ? "DUMMY" : "FALLBACK"}</em>
               </div>
             );
           })}
