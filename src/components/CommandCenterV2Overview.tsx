@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { AlertTriangle, ChevronRight, CloudRain, CloudSun, Layers3, Waves, Wind } from "lucide-react";
-import { STATIONS, aqiLabel, formatNumber, stationStatus, weatherLabel, type EnvironmentData } from "./CommandCenterV2Data";
+import { FALLBACK_ENVIRONMENT, STATIONS, aqiLabel, formatNumber, stationStatus, weatherLabel, type EnvironmentData } from "./CommandCenterV2Data";
 import { OperationalMap, PanelHeading, RainPanel, StationTable, StatusTag } from "./CommandCenterV2Shared";
 
 export function OverviewPage({
@@ -25,6 +25,9 @@ export function OverviewPage({
   const wl01 = STATIONS[0];
   const wl03 = STATIONS[1];
   const tmdWarning = environment.tmd.warnings.find((warning) => warning.relevant && warning.fresh);
+  const dwrSource = environment.sources.find((source) => source.id === "dwr-ews");
+  const dwrIsLive = !fallbackMode && dwrSource?.status === "online";
+  const dwr = dwrIsLive ? environment.dwr : FALLBACK_ENVIRONMENT.dwr;
 
   return (
     <>
@@ -131,9 +134,9 @@ export function OverviewPage({
                 <time>LIVE</time>
               </div>
               <div className="cc2-queue-item">
-                <i className="good" />
-                <div><strong>ข้อมูล DWR รับครบตามรอบ</strong><span>{environment.dwr.stationId} · {environment.dwr.stationName}</span></div>
-                <time>{environment.dwr.updatedAt ? "ล่าสุด" : "รอข้อมูล"}</time>
+                <i className={dwrIsLive ? "good" : ""} />
+                <div><strong>{dwrIsLive ? "ข้อมูล DWR รับครบตามรอบ" : "DWR ใช้ค่า DUMMY ชั่วคราว"}</strong><span>{dwr.stationId} · {dwr.stationName}</span></div>
+                <time>{dwrIsLive ? "LIVE" : "DUMMY"}</time>
               </div>
               <div className="cc2-queue-item">
                 <i className="good" />
@@ -177,11 +180,12 @@ export function OverviewPage({
               { id: "open-meteo", label: "MODEL", type: "model" },
             ].map((source) => {
               const current = environment.sources.find((item) => item.id === source.id);
+              const live = source.id === "dwr-ews" ? dwrIsLive : current?.status === "online";
               return (
                 <div className="cc2-trust-row" key={source.id}>
-                  <i className={source.type === "model" ? "model" : current?.status === "online" ? "" : "offline"} />
+                  <i className={source.type === "model" ? "model" : live ? "" : "offline"} />
                   <strong>{source.label}</strong>
-                  <span>{current?.status === "online" ? "LIVE" : "FALLBACK"}</span>
+                  <span>{live ? "LIVE" : source.id === "dwr-ews" ? "DUMMY" : "FALLBACK"}</span>
                 </div>
               );
             })}
