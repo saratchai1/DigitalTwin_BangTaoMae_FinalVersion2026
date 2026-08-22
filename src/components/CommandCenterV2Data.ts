@@ -58,6 +58,7 @@ export type EnvironmentData = {
     updatedAt: string | null;
     alertLevel: "normal" | "watch" | "warning" | "critical" | "unknown";
     alertLabel: string;
+    url?: string;
   };
   sources: Array<{
     id: string;
@@ -168,11 +169,15 @@ const FORECAST_FALLBACK: ForecastDay[] = Array.from({ length: 7 }, (_, index) =>
   };
 });
 
+/**
+ * Deterministic UI fixture used only when the public-data function cannot be
+ * reached. It deliberately does not identify itself as official or live.
+ */
 export const FALLBACK_ENVIRONMENT: EnvironmentData = {
   generatedAt: new Date().toISOString(),
   weather: {
-    source: "Open-Meteo",
-    sourceType: "model",
+    source: "MODEL FIXTURE · UI fallback",
+    sourceType: "fallback",
     current: {
       temperature: 29.6,
       humidity: 78,
@@ -190,14 +195,14 @@ export const FALLBACK_ENVIRONMENT: EnvironmentData = {
     daily: FORECAST_FALLBACK,
   },
   air: {
-    source: "Air4Thai · กรมควบคุมมลพิษ",
-    sourceType: "official",
-    stationName: "สถานีใกล้พื้นที่โครงการ",
+    source: "DUMMY · UI fixture",
+    sourceType: "dummy",
+    stationName: "สถานีตัวอย่างใกล้พื้นที่โครงการ",
     distanceKm: 32.4,
     pm25: 12.4,
     pm10: 21.8,
     aqi: 42,
-    updatedAt: new Date().toISOString(),
+    updatedAt: null,
   },
   dwr: {
     stationId: "STN2113",
@@ -210,15 +215,16 @@ export const FALLBACK_ENVIRONMENT: EnvironmentData = {
     rain24h: 18.6,
     waterLevel: 0.74,
     temperature: 27.8,
-    updatedAt: new Date().toISOString(),
-    alertLevel: "normal",
-    alertLabel: "ปกติ",
+    updatedAt: null,
+    alertLevel: "unknown",
+    alertLabel: "ยังยืนยันสถานะไม่ได้",
+    url: "https://ews.dwr.go.th/ews/index.php?language=th",
   },
   sources: [
-    { id: "dwr-ews", label: "ฝนและสถานะเตือนภัย", agency: "DWR", type: "official", status: "online" },
-    { id: "tmd-warning", label: "ประกาศเตือนภัย", agency: "TMD", type: "official", status: "online" },
-    { id: "air4thai", label: "คุณภาพอากาศ", agency: "PCD", type: "official", status: "online" },
-    { id: "open-meteo", label: "พยากรณ์รายพิกัด", agency: "MODEL", type: "model", status: "online" },
+    { id: "dwr-ews", label: "ฝนและสถานะเตือนภัย", agency: "DWR", type: "official", status: "unavailable" },
+    { id: "tmd-warning", label: "ประกาศเตือนภัย", agency: "TMD", type: "official", status: "unavailable" },
+    { id: "air4thai", label: "คุณภาพอากาศ", agency: "PCD", type: "official", status: "unavailable" },
+    { id: "open-meteo", label: "พยากรณ์รายพิกัด", agency: "MODEL", type: "model", status: "unavailable" },
   ],
   tmd: { warnings: [] },
 };
@@ -237,15 +243,16 @@ export const PAGE_META: Record<MenuKey, { kicker: string; title: string; descrip
   environment: {
     kicker: "ENVIRONMENT & HAZARD INTELLIGENCE",
     title: "สภาพอากาศ ฝน คุณภาพอากาศ และการเตือนภัย",
-    description: "แยกข้อมูลทางการออกจากแบบจำลองอย่างชัดเจน",
+    description: "แยกข้อมูลทางการออกจากแบบจำลองและค่าทดสอบอย่างชัดเจน",
   },
   surveillance: {
     kicker: "SITE SURVEILLANCE",
     title: "เครือข่ายกล้องเฝ้าระวัง",
-    description: "ติดตามพื้นที่สำคัญและความพร้อมของกล้อง 16 จุด",
+    description: "ตรวจสอบตำแหน่งกล้องและความพร้อมสำหรับการเชื่อมต่อภาพจริง",
   },
 };
 
+/** Formal engineering status. The V2 policy adds a separate pre-warning band. */
 export function stationStatus(station: WaterStation): StationStatus {
   if (station.currentLevel >= station.criticalLevel) return "critical";
   if (station.currentLevel >= station.warningLevel) return "warning";
@@ -293,6 +300,7 @@ export function normalizeEnvironment(raw: Partial<EnvironmentData>): Environment
   const weather = raw.weather ?? FALLBACK_ENVIRONMENT.weather;
   const air = raw.air ?? FALLBACK_ENVIRONMENT.air;
   const dwr = raw.dwr ?? FALLBACK_ENVIRONMENT.dwr;
+
   return {
     generatedAt: raw.generatedAt ?? new Date().toISOString(),
     weather: {
