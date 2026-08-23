@@ -26,6 +26,7 @@ import {
   type SourceDisplayState,
 } from "./CommandCenterV2Policy";
 import { OperationalMap, PanelHeading, RainPanel, StationTable, StatusTag } from "./CommandCenterV2Shared";
+import { WaterQualityPanel } from "./CommandCenterV2Monitoring";
 
 const SOURCE_SUMMARY = [
   { id: "dwr-ews", label: "DWR OFFICIAL" },
@@ -204,6 +205,8 @@ export function OverviewPage({
         <div className="critical"><i /> <strong>แดง · วิกฤต</strong><span>ถึงหรือสูงกว่า Critical</span></div>
         <div className="snapshot"><strong>PROJECT STATIONS</strong><span>DEMO SNAPSHOT</span></div>
       </section>
+
+      <WaterQualityPanel compact />
 
       <section className="cc2-ops-grid">
         <article className="cc2-panel">
