@@ -67,7 +67,7 @@
   right: 0 !important;
 }
 
-/* Air-quality chart: make dense 20-minute readings readable instead of stacking tiny labels. */
+/* Air-quality chart readability and command-center traffic-light language. */
 .cc2-project-air-grid > div {
   border-left-color: var(--cc2-status-green, #20e68a) !important;
   box-shadow: inset 0 1px 0 rgba(32, 230, 138, 0.04);
@@ -80,12 +80,13 @@
   box-shadow: inset 0 -2px 0 var(--cc2-status-green, #20e68a) !important;
 }
 
+/* Keep the 72 twenty-minute readings readable by scrolling horizontally instead of squeezing them. */
 .cc2-air-history-chart {
   height: 250px !important;
   overflow-x: auto;
   overflow-y: hidden;
   gap: 3px !important;
-  padding: 42px 4px 0;
+  padding: 8px 4px 0;
   scrollbar-width: thin;
   scrollbar-color: rgba(75, 214, 232, 0.32) transparent;
 }
@@ -93,24 +94,13 @@
 .cc2-air-bar {
   flex: 0 0 20px !important;
   min-width: 20px !important;
+  height: calc(100% - 34px) !important;
+  margin-bottom: 34px;
 }
 
+/* Values remain available via click/hover and the stat cards; do not clutter the plot with a number above every bar. */
 .cc2-air-bar b {
-  top: 7px !important;
-  min-width: 34px !important;
-  color: var(--text) !important;
-  font-size: 9px !important;
-  font-weight: 800 !important;
-  line-height: 1 !important;
-  letter-spacing: -0.02em;
-  opacity: 0.92 !important;
-  transform: rotate(-48deg);
-  transform-origin: center center;
-  text-shadow: 0 1px 7px rgba(0, 0, 0, 0.25);
-}
-
-.cc2-air-bar:nth-child(even) b {
-  top: 22px !important;
+  display: none !important;
 }
 
 .cc2-air-bar i {
@@ -121,6 +111,17 @@
   box-shadow: 0 0 10px rgba(32, 230, 138, 0.14) !important;
 }
 
+.cc2-air-bar span {
+  top: auto !important;
+  bottom: -27px !important;
+  min-width: 42px !important;
+  color: var(--text-muted) !important;
+  font-size: 8px !important;
+  font-weight: 700;
+  line-height: 1 !important;
+  opacity: 1 !important;
+}
+
 .cc2-air-bar:hover i,
 .cc2-air-bar:focus-visible i,
 .cc2-air-bar.selected i {
@@ -129,13 +130,29 @@
   transform: scaleX(1.35);
 }
 
-.cc2-air-bar.selected b {
-  color: var(--cc2-status-green, #20e68a) !important;
-}
-
 .cc2-air-history-stats > div:first-child {
   border-color: rgba(32, 230, 138, 0.35);
   box-shadow: inset 3px 0 0 var(--cc2-status-green, #20e68a);
+}
+
+/* Move the selected-point readout above the plot so the realtime X-axis stays unobstructed. */
+.cc2-air-selected-point {
+  top: 8px !important;
+  right: 10px !important;
+  bottom: auto !important;
+  padding: 5px 7px;
+  border: 1px solid rgba(32, 230, 138, 0.18);
+  border-radius: 8px;
+  background: rgba(6, 20, 25, 0.84);
+  backdrop-filter: blur(10px);
+}
+
+:root[data-theme="light"] .cc2-air-selected-point {
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.cc2-air-selected-point strong {
+  color: var(--cc2-status-green, #20e68a) !important;
 }
 
 /* Same traffic-light language as the rest of the command center. Current demo readings are normal/green; amber/red remain the escalation bands. */
@@ -171,18 +188,25 @@
   .cc2-air-history-chart {
     min-width: 0 !important;
     height: 230px !important;
-    padding-top: 38px;
+    padding-top: 8px;
   }
 
   .cc2-air-bar {
     flex-basis: 18px !important;
     min-width: 18px !important;
+    height: calc(100% - 32px) !important;
+    margin-bottom: 32px;
   }
 
-  .cc2-air-bar b {
-    min-width: 31px !important;
-    font-size: 8px !important;
-    opacity: 0.9 !important;
+  .cc2-air-bar span {
+    bottom: -25px !important;
+    min-width: 39px !important;
+    font-size: 7px !important;
+  }
+
+  .cc2-air-selected-point {
+    top: 6px !important;
+    font-size: 7px !important;
   }
 
   .cc2-air-history::after {
