@@ -80,6 +80,38 @@ export function CommandCenterV2(_props: CommandCenterV2Props) {
     return () => window.clearInterval(timer);
   }, [refreshEnvironment]);
 
+  /*
+   * The 24-hour air chart is intentionally horizontally scrollable so 20-minute
+   * readings stay legible. Always open it at the latest reading, and return to
+   * the latest edge after changing metric/range. Otherwise the first frame shows
+   * older readings and makes the visible right edge look like it is not "now".
+   */
+  useEffect(() => {
+    if (activeMenu !== "environment") return;
+
+    const scrollAirChartToLatest = () => {
+      window.requestAnimationFrame(() => {
+        const chart = document.querySelector<HTMLElement>(".cc2-air-history-chart");
+        if (!chart) return;
+        chart.scrollTo({ left: chart.scrollWidth, behavior: "auto" });
+      });
+    };
+
+    const initialTimer = window.setTimeout(scrollAirChartToLatest, 80);
+    const page = document.querySelector(".cc2-page");
+    const handleAirChartControl = (event: Event) => {
+      const target = event.target as Element | null;
+      if (!target?.closest(".cc2-air-tabs button, .cc2-air-range button")) return;
+      window.setTimeout(scrollAirChartToLatest, 0);
+    };
+
+    page?.addEventListener("click", handleAirChartControl);
+    return () => {
+      window.clearTimeout(initialTimer);
+      page?.removeEventListener("click", handleAirChartControl);
+    };
+  }, [activeMenu]);
+
   const page = PAGE_META[activeMenu];
   const sourceStates = SOURCE_ITEMS.map((source) => ({
     ...source,
