@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Activity,
   Droplets,
   ExternalLink,
   Gauge,
@@ -8,7 +7,7 @@ import {
   Waves,
   Wind,
 } from "lucide-react";
-import { PanelHeading, StatusTag } from "./CommandCenterV2Shared";
+import { StatusTag } from "./CommandCenterV2Shared";
 import "./CommandCenterV2.monitoring.css";
 
 type IqairPublicData = {
@@ -23,6 +22,9 @@ type IqairPublicData = {
   url: string;
   source: string;
 };
+
+type AirMetricKey = "aqi" | "pm25" | "pm10";
+type AirRange = "today" | "24h";
 
 const IQAIR_URL = "https://www.iqair.com/th/air-quality/thailand/krabi/krabi/krabi-international-school";
 
@@ -101,11 +103,42 @@ const PROJECT_AIR_METRICS = [
   { label: "Battery", value: "96%" },
 ] as const;
 
-const AIR_HISTORY = [
-  24, 24, 24, 25, 25, 27, 28, 25, 27, 24, 24, 25, 28, 29, 25, 25, 24, 25, 24, 24, 24, 23, 24, 28,
-  29, 28, 25, 25, 27, 29, 27, 27, 24, 27, 25, 28, 25, 24, 23, 24, 25, 25, 25, 25, 25, 24, 24, 25,
-  27, 29, 29, 29, 27, 27, 25, 28, 27, 28, 28, 29, 28, 27,
-];
+/* Exact DEMO sequences transcribed from the supplied reference screenshots. */
+const AIR_SERIES: Record<AirMetricKey, { label: string; unit: string; maxScale: number; values: number[] }> = {
+  aqi: {
+    label: "AQI",
+    unit: "AQI",
+    maxScale: 30,
+    values: [
+      24, 25, 24, 27, 24, 25, 24, 24, 24, 25, 25, 27, 28, 25, 27, 24, 24, 25,
+      28, 29, 25, 25, 24, 25, 24, 24, 24, 24, 23, 24, 28, 29, 28, 25, 25, 27,
+      29, 27, 27, 24, 27, 25, 28, 25, 24, 23, 24, 25, 25, 25, 25, 25, 25, 24,
+      24, 25, 27, 29, 29, 29, 27, 27, 25, 28, 27, 28, 28, 29, 28, 27, 24, 25,
+    ],
+  },
+  pm25: {
+    label: "PM2.5",
+    unit: "µg/m³",
+    maxScale: 18,
+    values: [
+      14, 16, 13, 17, 13, 14, 15, 14, 14, 16, 15, 15, 17, 13, 16, 13, 14, 17,
+      16, 15, 14, 15, 14, 15, 13, 15, 15, 13, 13, 17, 17, 14, 16, 14, 15, 17,
+      16, 13, 17, 13, 16, 16, 15, 14, 14, 13, 15, 16, 14, 15, 16, 14, 14, 14,
+      15, 16, 15, 17, 16, 16, 14, 16, 14, 17, 15, 15, 17, 17, 13, 16, 13, 16,
+    ],
+  },
+  pm10: {
+    label: "PM10",
+    unit: "µg/m³",
+    maxScale: 25,
+    values: [
+      25, 24, 21, 24, 22, 20, 21, 21, 19, 24, 20, 24, 23, 19, 25, 19, 24, 20,
+      23, 23, 20, 19, 21, 19, 22, 19, 21, 20, 21, 20, 24, 22, 24, 21, 19, 20,
+      20, 23, 24, 21, 22, 23, 23, 24, 23, 21, 19, 25, 22, 23, 22, 21, 25, 20,
+      23, 24, 20, 24, 24, 19, 25, 21, 23, 24, 23, 24, 19, 20, 21, 24, 19, 24,
+    ],
+  },
+};
 
 const WIND_SAMPLES = [
   { hour: 0.4, speed: 2.2, direction: 255 },
@@ -160,7 +193,7 @@ const WIND_ROSE = [
   { label: "NNW", frequency: 4.8, speed: 2.4 },
 ];
 
-function SparkArea({ values, stroke = "#43d9ec", fill = "rgba(67,217,236,.16)" }: { values: readonly number[]; stroke?: string; fill?: string }) {
+function SparkArea({ values }: { values: readonly number[] }) {
   const width = 100;
   const height = 30;
   const min = Math.min(...values);
@@ -174,8 +207,8 @@ function SparkArea({ values, stroke = "#43d9ec", fill = "rgba(67,217,236,.16)" }
   const area = `0,${height} ${points.join(" ")} ${width},${height}`;
   return (
     <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" aria-hidden="true">
-      <polygon points={area} fill={fill} />
-      <polyline points={points.join(" ")} fill="none" stroke={stroke} strokeWidth="1.2" vectorEffect="non-scaling-stroke" />
+      <polygon className="cc2-monitor-spark-fill" points={area} />
+      <polyline className="cc2-monitor-spark-line" points={points.join(" ")} fill="none" strokeWidth="1.2" vectorEffect="non-scaling-stroke" />
     </svg>
   );
 }
@@ -226,7 +259,7 @@ export function FlowMeterPanel() {
               <div><strong>{meter.label}</strong><small>{meter.thai}</small></div>
               <b>{meter.value.toFixed(2)} <em>m³/hr</em></b>
             </div>
-            <div className="cc2-flow-chart"><SparkArea values={meter.series} stroke="#c9bd28" fill="rgba(201,189,40,.16)" /></div>
+            <div className="cc2-flow-chart"><SparkArea values={meter.series} /></div>
           </article>
         ))}
       </div>
@@ -286,19 +319,135 @@ function IqairPublicPanel() {
   );
 }
 
+function bangkokDateKey(date: Date) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Bangkok",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
+
+function bangkokTime(date: Date) {
+  return new Intl.DateTimeFormat("th-TH", {
+    timeZone: "Asia/Bangkok",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
+}
+
+function bangkokDate(date: Date) {
+  return new Intl.DateTimeFormat("th-TH", {
+    timeZone: "Asia/Bangkok",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+}
+
 function ProjectAirHistory() {
-  const maximum = Math.max(...AIR_HISTORY, 30);
+  const [metricKey, setMetricKey] = useState<AirMetricKey>("aqi");
+  const [range, setRange] = useState<AirRange>("24h");
+  const [now, setNow] = useState(() => new Date());
+  const metric = AIR_SERIES[metricKey];
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const allPoints = useMemo(() => metric.values.map((value, index) => ({
+    value,
+    at: new Date(now.getTime() - (metric.values.length - 1 - index) * 20 * 60_000),
+    sourceIndex: index,
+  })), [metric, now]);
+
+  const points = useMemo(() => {
+    if (range === "24h") return allPoints;
+    const today = bangkokDateKey(now);
+    return allPoints.filter((point) => bangkokDateKey(point.at) === today);
+  }, [allPoints, now, range]);
+
+  const [selectedSourceIndex, setSelectedSourceIndex] = useState(metric.values.length - 1);
+
+  useEffect(() => {
+    setSelectedSourceIndex(metric.values.length - 1);
+  }, [metricKey, range, metric.values.length]);
+
+  const selected = points.find((point) => point.sourceIndex === selectedSourceIndex) ?? points[points.length - 1];
+  const latest = points[points.length - 1]?.value ?? metric.values[metric.values.length - 1];
+  const maximum = Math.max(...points.map((point) => point.value));
+  const minimum = Math.min(...points.map((point) => point.value));
+  const latestAt = points[points.length - 1]?.at ?? now;
+  const labelEvery = points.length > 54 ? 8 : points.length > 30 ? 5 : 3;
+
   return (
     <div className="cc2-air-history">
-      <div className="cc2-air-history-head"><strong>ดัชนีคุณภาพอากาศภายในโครงการ</strong><span>วันนี้ · DEMO IOT</span></div>
-      <div className="cc2-air-history-chart">
-        {AIR_HISTORY.map((value, index) => (
-          <div className="cc2-air-bar" key={`${index}-${value}`}>
-            <b>{index % 4 === 0 ? value : ""}</b>
-            <i style={{ height: `${Math.max(18, (value / maximum) * 100)}%` }} />
-            <span>{index % 8 === 0 ? `${String(Math.floor(index / 3)).padStart(2, "0")}:00` : ""}</span>
-          </div>
+      <div className="cc2-air-history-head">
+        <div>
+          <strong>ดัชนีคุณภาพอากาศภายในโครงการ</strong>
+          <span>DEMO IOT · ค่าอ้างอิงตามภาพที่แนบ · เวลาแกน X อิงเวลาประเทศไทย</span>
+        </div>
+        <div className="cc2-air-range" role="group" aria-label="ช่วงเวลากราฟคุณภาพอากาศ">
+          <button type="button" className={range === "today" ? "active" : ""} onClick={() => setRange("today")}>วันนี้</button>
+          <button type="button" className={range === "24h" ? "active" : ""} onClick={() => setRange("24h")}>24 ชั่วโมง</button>
+        </div>
+      </div>
+
+      <div className="cc2-air-tabs" role="tablist" aria-label="เลือกดัชนีคุณภาพอากาศ">
+        {(["aqi", "pm25", "pm10"] as AirMetricKey[]).map((key) => (
+          <button
+            type="button"
+            key={key}
+            role="tab"
+            aria-selected={metricKey === key}
+            className={metricKey === key ? "active" : ""}
+            onClick={() => setMetricKey(key)}
+          >
+            {AIR_SERIES[key].label}
+          </button>
         ))}
+      </div>
+
+      <div className="cc2-air-history-layout">
+        <div className="cc2-air-history-chart-shell">
+          <div className="cc2-air-y-axis" aria-hidden="true">
+            {[1, .75, .5, .25, 0].map((ratio) => <span key={ratio} style={{ bottom: `${ratio * 100}%` }}>{Math.round(metric.maxScale * ratio)}</span>)}
+          </div>
+          <div className="cc2-air-history-chart">
+            {points.map((point, index) => {
+              const selectedBar = selected?.sourceIndex === point.sourceIndex;
+              const showTime = index % labelEvery === 0 || index === points.length - 1;
+              return (
+                <button
+                  type="button"
+                  className={`cc2-air-bar ${selectedBar ? "selected" : ""}`}
+                  key={`${metricKey}-${point.sourceIndex}`}
+                  onClick={() => setSelectedSourceIndex(point.sourceIndex)}
+                  title={`${bangkokTime(point.at)} · ${point.value} ${metric.unit}`}
+                  aria-label={`${metric.label} ${point.value} ${metric.unit} เวลา ${bangkokTime(point.at)}`}
+                >
+                  <b>{point.value}</b>
+                  <i style={{ height: `${Math.max(6, (point.value / metric.maxScale) * 100)}%` }} />
+                  <span>{showTime ? bangkokTime(point.at) : ""}</span>
+                </button>
+              );
+            })}
+          </div>
+          {selected && (
+            <div className="cc2-air-selected-point">
+              <strong>{metric.label} {selected.value} {metric.unit}</strong>
+              <span>{bangkokDate(selected.at)} · {bangkokTime(selected.at)}</span>
+            </div>
+          )}
+        </div>
+
+        <aside className="cc2-air-history-stats">
+          <div><span>อัปเดตล่าสุด</span><strong>{latest}</strong><small>{metric.unit}<br />{bangkokDate(latestAt)} · {bangkokTime(latestAt)}</small></div>
+          <div><span>สูงที่สุด</span><strong>{maximum}</strong><small>{metric.unit}</small></div>
+          <div><span>ต่ำที่สุด</span><strong>{minimum}</strong><small>{metric.unit}</small></div>
+        </aside>
       </div>
     </div>
   );
@@ -308,7 +457,7 @@ export function AirQualityIntelligencePanel() {
   return (
     <section className="cc2-air-intelligence">
       <header className="cc2-monitor-heading cc2-air-heading">
-        <div className="cc2-monitor-heading-icon purple"><Radio size={18} /></div>
+        <div className="cc2-monitor-heading-icon"><Radio size={18} /></div>
         <div><p>AIR QUALITY INTELLIGENCE</p><h2>คุณภาพอากาศภายในและภายนอกโครงการ</h2><span>แยก public data ภายนอกออกจาก IoT ภายในโครงการอย่างชัดเจน</span></div>
       </header>
       <div className="cc2-air-split">
@@ -329,9 +478,9 @@ export function AirQualityIntelligencePanel() {
 }
 
 function windColor(speed: number) {
-  if (speed >= 3.4) return "#ff352f";
-  if (speed >= 1.6) return "#5f79d8";
-  return "#8dcc7b";
+  if (speed >= 3.4) return "#ff3f5f";
+  if (speed >= 1.6) return "#4bd6e8";
+  return "#20e68a";
 }
 
 function polarPoint(cx: number, cy: number, radius: number, angle: number) {
@@ -379,7 +528,7 @@ export function WindIntelligencePanel() {
   return (
     <section className="cc2-wind-intelligence">
       <header className="cc2-monitor-heading">
-        <div className="cc2-monitor-heading-icon purple"><Wind size={18} /></div>
+        <div className="cc2-monitor-heading-icon"><Wind size={18} /></div>
         <div><p>WIND INTELLIGENCE · PROJECT IOT</p><h2>ทิศทางลมและ Wind Rose</h2><span>ข้อมูล DUMMY ตามรูปแบบสถานี IoT ที่วางแผนติดตั้งในพื้นที่โครงการ</span></div>
         <span className="cc2-monitor-demo">DEMO · PLANNED IOT</span>
       </header>
