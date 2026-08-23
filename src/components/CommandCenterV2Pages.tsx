@@ -32,6 +32,12 @@ import {
   sourceStateLabel,
 } from "./CommandCenterV2Policy";
 import { PanelHeading, RainPanel, StatusTag } from "./CommandCenterV2Shared";
+import {
+  AirQualityIntelligencePanel,
+  FlowMeterPanel,
+  WaterQualityPanel,
+  WindIntelligencePanel,
+} from "./CommandCenterV2Monitoring";
 
 export function WaterPage() {
   const critical = STATIONS.filter((station) => operationalStationStatus(station) === "critical").length;
@@ -77,6 +83,8 @@ export function WaterPage() {
           </div>
         </div>
       </section>
+
+      <FlowMeterPanel />
 
       <div className="station-grid cc2-water-stations">
         {STATIONS.map((station, index) => {
@@ -176,6 +184,12 @@ export function EnvironmentPage({ environment, fallbackMode }: { environment: En
           </div>
         </article>
       </section>
+
+      <WaterQualityPanel />
+
+      <AirQualityIntelligencePanel />
+
+      <WindIntelligencePanel />
 
       <section className="cc2-env-main-grid">
         <RainPanel environment={environment} />
