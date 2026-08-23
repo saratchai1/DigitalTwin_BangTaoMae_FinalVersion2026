@@ -4,6 +4,7 @@ import { FALLBACK_ENVIRONMENT, PAGE_META, normalizeEnvironment, type Environment
 import { sourceDisplayState, sourceStateLabel } from "./CommandCenterV2Policy";
 import { OverviewPage } from "./CommandCenterV2Overview";
 import { EnvironmentPage, SurveillancePage, WaterPage } from "./CommandCenterV2Pages";
+import { HighwayLiveCCTV } from "./HighwayLiveCCTV";
 import "./CommandCenterV2.core.css";
 import "./CommandCenterV2.overview.css";
 import "./CommandCenterV2.pages.css";
@@ -28,7 +29,7 @@ const MENU_ITEMS: Array<{
   { key: "overview", label: "ภาพรวมศูนย์สั่งการ", caption: "Situation awareness", shortLabel: "ภาพรวม", icon: LayoutDashboard },
   { key: "water", label: "เครือข่ายน้ำ", caption: "Reservoir & canal", shortLabel: "น้ำ", icon: Waves },
   { key: "environment", label: "สิ่งแวดล้อม", caption: "Weather & hazards", shortLabel: "สิ่งแวดล้อม", icon: Leaf },
-  { key: "surveillance", label: "กล้องเฝ้าระวัง", caption: "16 demo slots", shortLabel: "กล้อง", icon: Camera },
+  { key: "surveillance", label: "กล้องเฝ้าระวัง", caption: "Live + demo feeds", shortLabel: "กล้อง", icon: Camera },
 ];
 
 const SOURCE_ITEMS = [
@@ -194,10 +195,20 @@ export function CommandCenterV2(_props: CommandCenterV2Props) {
 
         <div className="cc2-scroll">
           <div className="cc2-page">
-            {activeMenu === "overview" && <OverviewPage environment={environment} fallbackMode={fallbackMode} onOpenWater={() => navigate("water")} />}
+            {activeMenu === "overview" && (
+              <>
+                <OverviewPage environment={environment} fallbackMode={fallbackMode} onOpenWater={() => navigate("water")} />
+                <HighwayLiveCCTV compact />
+              </>
+            )}
             {activeMenu === "water" && <WaterPage />}
             {activeMenu === "environment" && <EnvironmentPage environment={environment} fallbackMode={fallbackMode} />}
-            {activeMenu === "surveillance" && <SurveillancePage now={now} />}
+            {activeMenu === "surveillance" && (
+              <>
+                <HighwayLiveCCTV />
+                <SurveillancePage now={now} />
+              </>
+            )}
           </div>
         </div>
 
