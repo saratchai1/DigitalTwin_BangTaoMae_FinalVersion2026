@@ -1,14 +1,16 @@
-/* Planned IoT monitoring panels restored from the earlier dashboard references. */
+/* Monitoring additions — visually aligned with the V2 command-center theme. */
 
 .cc2-monitor-panel,
 .cc2-air-intelligence,
 .cc2-wind-intelligence,
 .cc2-flow-section {
+  overflow: hidden;
   border: 1px solid var(--border);
   border-radius: 20px;
-  background: var(--surface);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.018), transparent 50%),
+    var(--surface);
   box-shadow: var(--shadow-soft);
-  overflow: hidden;
 }
 
 .cc2-monitor-heading,
@@ -59,14 +61,11 @@
   height: 38px;
   flex: 0 0 38px;
   place-items: center;
+  border: 1px solid rgba(75,214,232,.22);
   border-radius: 11px;
-  color: #09140d;
-  background: #d0c52d;
-}
-
-.cc2-monitor-heading-icon.purple {
-  color: #fff;
-  background: #6f35d2;
+  color: var(--cyan);
+  background: var(--cyan-soft);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
 }
 
 .cc2-monitor-demo,
@@ -76,23 +75,28 @@
   align-items: center;
   margin: 0 !important;
   padding: 0 9px;
-  border: 1px solid rgba(255,193,69,.46);
+  border: 1px solid rgba(255,193,69,.42);
   border-radius: 999px;
-  color: #ffc145 !important;
-  background: rgba(255,193,69,.08);
+  color: var(--cc2-status-amber, #ffc145) !important;
+  background: rgba(255,193,69,.075);
   font: 800 8px/1 Inter, sans-serif !important;
   letter-spacing: .07em;
   white-space: nowrap;
 }
 
-/* Water quality */
-.cc2-water-quality {
-  background: linear-gradient(160deg, rgba(26,74,47,.92), rgba(17,55,38,.96));
-  border-color: rgba(201,189,40,.34);
+/* Shared mini chart language */
+.cc2-monitor-spark-line {
+  stroke: var(--cyan);
+  filter: drop-shadow(0 0 3px rgba(75,214,232,.28));
 }
 
-.cc2-water-quality .cc2-monitor-heading {
-  border-bottom-color: rgba(201,189,40,.17);
+.cc2-monitor-spark-fill {
+  fill: rgba(75,214,232,.11);
+}
+
+/* Water quality */
+.cc2-water-quality {
+  border-color: rgba(75,214,232,.18);
 }
 
 .cc2-water-quality-grid {
@@ -105,14 +109,17 @@
 .cc2-water-quality-card {
   min-width: 0;
   overflow: hidden;
-  border: 1px solid rgba(205,195,37,.68);
-  border-radius: 12px;
-  background: rgba(70,128,79,.58);
+  border: 1px solid rgba(75,214,232,.18);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 92% 0%, rgba(32,230,138,.08), transparent 35%),
+    rgba(125,175,185,.035);
+  box-shadow: inset 0 3px 0 rgba(32,230,138,.45);
 }
 
 .cc2-wq-top {
   display: grid;
-  grid-template-columns: 30px minmax(0,1fr) auto;
+  grid-template-columns: 32px minmax(0,1fr) auto;
   gap: 10px;
   align-items: center;
   min-height: 70px;
@@ -124,44 +131,47 @@
   width: 30px;
   height: 30px;
   place-items: center;
-  border-radius: 7px;
-  color: #59d9eb;
-  background: #d0c52d;
+  border: 1px solid rgba(75,214,232,.2);
+  border-radius: 9px;
+  color: var(--cyan);
+  background: rgba(75,214,232,.09);
 }
 
 .cc2-wq-top strong,
 .cc2-flow-top strong {
   display: block;
-  color: #9bcda5;
+  color: var(--text);
   font: 800 10px/1.25 Inter, sans-serif;
-  letter-spacing: .06em;
+  letter-spacing: .045em;
 }
 
 .cc2-wq-top small,
 .cc2-flow-top small {
   display: block;
   margin-top: 3px;
-  color: #8bc79a;
+  color: var(--text-muted);
   font-size: 8px;
 }
 
 .cc2-wq-top b,
 .cc2-flow-top b {
-  color: #f8f7ec;
+  color: var(--text);
   font: 800 22px/1 Inter, sans-serif;
+  letter-spacing: -.03em;
   white-space: nowrap;
 }
 
 .cc2-wq-top em,
 .cc2-flow-top em {
-  color: #91c59a;
-  font: 500 8px/1 Inter, sans-serif;
+  color: var(--text-muted);
+  font: 600 8px/1 Inter, sans-serif;
   font-style: normal;
 }
 
 .cc2-wq-chart,
 .cc2-flow-chart {
   height: 78px;
+  border-top: 1px solid rgba(75,214,232,.06);
 }
 
 .cc2-wq-chart svg,
@@ -171,18 +181,16 @@
   height: 100%;
 }
 
+.cc2-water-quality-card .cc2-monitor-spark-line { stroke: var(--cyan); }
+.cc2-water-quality-card .cc2-monitor-spark-fill { fill: rgba(32,230,138,.10); }
+
 .cc2-water-quality.compact .cc2-monitor-heading { padding-top: 14px; }
 .cc2-water-quality.compact .cc2-water-quality-grid { padding-top: 11px; }
 .cc2-water-quality.compact .cc2-wq-chart { height: 58px; }
 
-/* Flow meters: intentionally follows the older reference visual. */
+/* Flow meters — layout stays close to the supplied reference, palette follows V2. */
 .cc2-flow-section {
-  background: #173e2a;
-  border-color: rgba(201,189,40,.32);
-}
-
-.cc2-flow-section > header {
-  border-bottom-color: rgba(201,189,40,.16);
+  border-color: rgba(75,214,232,.18);
 }
 
 .cc2-flow-grid {
@@ -194,9 +202,12 @@
 
 .cc2-flow-card {
   overflow: hidden;
-  border: 1px solid rgba(201,189,40,.78);
-  border-radius: 10px;
-  background: rgba(63,118,73,.82);
+  border: 1px solid rgba(75,214,232,.2);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 85% 0%, rgba(75,214,232,.08), transparent 32%),
+    rgba(125,175,185,.035);
+  box-shadow: inset 0 3px 0 rgba(75,214,232,.42);
 }
 
 .cc2-flow-top {
@@ -211,15 +222,23 @@
 .cc2-flow-dot {
   width: 29px;
   height: 29px;
+  border: 6px solid rgba(32,230,138,.12);
   border-radius: 50%;
-  background: #c9bd28;
+  background: var(--green);
+  box-shadow: 0 0 18px rgba(32,230,138,.16);
 }
 
 .cc2-flow-top b { font-size: 30px; }
 .cc2-flow-chart { height: 88px; }
+.cc2-flow-card .cc2-monitor-spark-line { stroke: var(--cyan); }
+.cc2-flow-card .cc2-monitor-spark-fill { fill: rgba(75,214,232,.10); }
 
-/* Air quality */
-.cc2-air-intelligence { background: var(--surface); }
+/* Air-quality summary */
+.cc2-air-intelligence,
+.cc2-wind-intelligence {
+  border-color: rgba(75,214,232,.14);
+}
+
 .cc2-air-heading { border-bottom: 0; padding-bottom: 8px; }
 
 .cc2-air-split {
@@ -233,7 +252,9 @@
 .cc2-project-air {
   border: 1px solid var(--border);
   border-radius: 15px;
-  background: rgba(122,155,165,.035);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.014), transparent),
+    rgba(125,175,185,.025);
 }
 
 .cc2-air-public {
@@ -243,9 +264,9 @@
   overflow: hidden;
 }
 
-.cc2-air-public.good { border-top: 4px solid #20e68a; }
-.cc2-air-public.moderate { border-top: 4px solid #ffc145; }
-.cc2-air-public.poor { border-top: 4px solid #ff3f5f; }
+.cc2-air-public.good { border-top: 4px solid var(--green); }
+.cc2-air-public.moderate { border-top: 4px solid var(--amber); }
+.cc2-air-public.poor { border-top: 4px solid var(--red); }
 
 .cc2-air-public-head,
 .cc2-project-air-head {
@@ -283,8 +304,8 @@
   white-space: nowrap;
 }
 
-.cc2-air-public-head > span.live { color: #20e68a; background: rgba(32,230,138,.10); border: 1px solid rgba(32,230,138,.34); }
-.cc2-air-public-head > span.demo { color: #ffc145; background: rgba(255,193,69,.10); border: 1px solid rgba(255,193,69,.38); }
+.cc2-air-public-head > span.live { color: var(--green); background: rgba(32,230,138,.08); border: 1px solid rgba(32,230,138,.28); }
+.cc2-air-public-head > span.demo { color: var(--amber); background: rgba(255,193,69,.08); border: 1px solid rgba(255,193,69,.3); }
 
 .cc2-air-public-main {
   display: grid;
@@ -300,13 +321,14 @@
   flex-direction: column;
   justify-content: center;
   padding: 12px;
+  border: 1px solid rgba(75,214,232,.1);
   border-radius: 13px;
-  background: rgba(255,193,69,.10);
+  background: rgba(75,214,232,.055);
 }
 
 .cc2-air-aqi small { color: var(--text-muted); font-size: 8px; }
 .cc2-air-aqi strong { margin-top: 4px; color: var(--text); font: 800 42px/1 Inter,sans-serif; }
-.cc2-air-aqi span { margin-top: 7px; color: #ffc145; font-size: 9px; font-weight: 800; }
+.cc2-air-aqi span { margin-top: 7px; color: var(--cyan); font-size: 9px; font-weight: 800; }
 
 .cc2-air-public-metrics {
   display: grid;
@@ -340,50 +362,254 @@
 .cc2-air-public footer a { display: inline-flex; align-items: center; gap: 5px; color: var(--cyan); font-size: 8px; text-decoration: none; }
 
 .cc2-project-air { overflow: hidden; }
-.cc2-project-air-head p { color: #9b78ec; }
+.cc2-project-air-head p { color: var(--cyan); }
 
 .cc2-project-air-grid {
   display: grid;
   grid-template-columns: repeat(9,minmax(0,1fr));
-  gap: 1px;
-  padding: 13px 15px;
-  background: rgba(111,53,210,.15);
+  gap: 6px;
+  padding: 13px 15px 9px;
+  background: transparent;
 }
 
 .cc2-project-air-grid > div {
   min-width: 0;
   min-height: 67px;
   padding: 9px 8px;
-  border-left: 3px solid #7a32d7;
-  background: var(--surface-solid);
+  border: 1px solid var(--border);
+  border-left: 3px solid rgba(75,214,232,.55);
+  border-radius: 10px;
+  background: rgba(125,175,185,.025);
 }
 
-.cc2-project-air-grid span { display: block; overflow: hidden; color: var(--text-muted); font-size: 8px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
-.cc2-project-air-grid strong { display: block; margin-top: 9px; color: var(--text); font: 800 20px/1 Inter,sans-serif; }
+.cc2-project-air-grid span {
+  display: block;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 8px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
-.cc2-air-history { padding: 3px 15px 14px; }
-.cc2-air-history-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0 10px; }
-.cc2-air-history-head strong { font-size: 11px; }
-.cc2-air-history-head span { color: var(--text-muted); font-size: 8px; }
+.cc2-project-air-grid strong {
+  display: block;
+  margin-top: 9px;
+  color: var(--text);
+  font: 800 20px/1 Inter,sans-serif;
+}
 
-.cc2-air-history-chart {
+/* Interactive air-quality history */
+.cc2-air-history {
+  margin: 5px 15px 15px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(75,214,232,.055), transparent 30%),
+    rgba(6,20,25,.28);
+}
+
+:root[data-theme="light"] .cc2-air-history { background: rgba(255,255,255,.58); }
+
+.cc2-air-history-head {
   display: flex;
-  height: 116px;
-  align-items: flex-end;
-  gap: 2px;
-  padding: 10px 3px 0;
-  border-top: 1px solid var(--border);
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 14px 9px;
+}
+
+.cc2-air-history-head > div:first-child { min-width: 0; }
+.cc2-air-history-head strong { display: block; color: var(--text); font-size: 12px; }
+.cc2-air-history-head span { display: block; margin-top: 4px; color: var(--text-muted); font-size: 8px; line-height: 1.4; }
+
+.cc2-air-range {
+  display: inline-flex;
+  flex: 0 0 auto;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(125,175,185,.035);
+}
+
+.cc2-air-range button,
+.cc2-air-tabs button {
+  border: 0;
+  color: var(--text-muted);
+  background: transparent;
+  cursor: pointer;
+  font: 700 9px/1 Inter, sans-serif;
+  transition: 150ms ease;
+}
+
+.cc2-air-range button {
+  min-height: 29px;
+  padding: 0 10px;
+  border-radius: 7px;
+}
+
+.cc2-air-range button.active {
+  color: var(--text);
+  background: var(--surface-solid);
+  box-shadow: 0 3px 12px rgba(0,0,0,.12);
+}
+
+.cc2-air-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 3px 14px 10px;
   border-bottom: 1px solid var(--border);
 }
 
-.cc2-air-bar { display: flex; min-width: 0; height: 100%; flex: 1; flex-direction: column; justify-content: flex-end; align-items: center; }
-.cc2-air-bar b { height: 13px; color: var(--text-muted); font-size: 6px; font-weight: 700; }
-.cc2-air-bar i { width: 60%; min-width: 2px; max-width: 7px; border-radius: 3px 3px 0 0; background: #8ed84f; }
-.cc2-air-bar span { height: 13px; margin-top: 3px; color: var(--text-dim); font-size: 6px; white-space: nowrap; }
+.cc2-air-tabs button {
+  min-width: 66px;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  font-size: 10px;
+}
+
+.cc2-air-tabs button:hover { color: var(--text); background: rgba(75,214,232,.045); }
+.cc2-air-tabs button.active {
+  color: var(--cyan);
+  border-color: rgba(75,214,232,.34);
+  background: rgba(75,214,232,.085);
+  box-shadow: inset 0 -2px 0 var(--cyan);
+}
+
+.cc2-air-history-layout {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 142px;
+  gap: 12px;
+  padding: 13px 14px 14px;
+}
+
+.cc2-air-history-chart-shell {
+  position: relative;
+  min-width: 0;
+  padding: 7px 8px 38px 38px;
+  border: 1px solid rgba(75,214,232,.07);
+  border-radius: 11px;
+  background:
+    repeating-linear-gradient(to top, transparent 0, transparent calc(25% - 1px), var(--border) 25%),
+    rgba(125,175,185,.018);
+}
+
+.cc2-air-y-axis {
+  position: absolute;
+  top: 14px;
+  bottom: 44px;
+  left: 5px;
+  width: 28px;
+  color: var(--text-dim);
+  font-size: 7px;
+}
+
+.cc2-air-y-axis span {
+  position: absolute;
+  right: 0;
+  transform: translateY(50%);
+}
+
+.cc2-air-history-chart {
+  display: flex;
+  height: 210px;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.cc2-air-bar {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  height: 100%;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0;
+  border: 0;
+  color: var(--text-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.cc2-air-bar b {
+  position: absolute;
+  top: 1px;
+  min-width: 16px;
+  color: var(--text-muted);
+  font-size: 6px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+}
+
+.cc2-air-bar i {
+  width: 58%;
+  min-width: 2px;
+  max-width: 8px;
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(to top, rgba(32,230,138,.70), var(--green));
+  box-shadow: 0 0 8px rgba(32,230,138,.08);
+  transition: 140ms ease;
+}
+
+.cc2-air-bar span {
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 50%;
+  min-width: 32px;
+  transform: translateX(-50%);
+  color: var(--text-dim);
+  font-size: 6px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.cc2-air-bar:hover i,
+.cc2-air-bar:focus-visible i,
+.cc2-air-bar.selected i {
+  background: linear-gradient(to top, rgba(75,214,232,.72), var(--cyan));
+  box-shadow: 0 0 12px rgba(75,214,232,.24);
+  transform: scaleX(1.35);
+}
+
+.cc2-air-bar.selected b { color: var(--cyan); }
+
+.cc2-air-selected-point {
+  position: absolute;
+  right: 10px;
+  bottom: 7px;
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  color: var(--text-muted);
+  font-size: 7px;
+}
+
+.cc2-air-selected-point strong { color: var(--cyan); font-size: 8px; }
+
+.cc2-air-history-stats {
+  display: grid;
+  gap: 8px;
+}
+
+.cc2-air-history-stats > div {
+  min-height: 78px;
+  padding: 10px 11px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: rgba(125,175,185,.025);
+}
+
+.cc2-air-history-stats span { display: block; color: var(--text-muted); font-size: 8px; font-weight: 700; }
+.cc2-air-history-stats strong { display: block; margin-top: 5px; color: var(--text); font: 800 24px/1 Inter,sans-serif; }
+.cc2-air-history-stats small { display: block; margin-top: 5px; color: var(--text-dim); font-size: 7px; line-height: 1.4; }
 
 /* Wind */
-.cc2-wind-intelligence { background: var(--surface); }
-
 .cc2-wind-grid {
   display: grid;
   grid-template-columns: minmax(0,1.55fr) minmax(300px,.75fr);
@@ -396,7 +622,9 @@
   min-width: 0;
   border: 1px solid var(--border);
   border-radius: 14px;
-  background: rgba(125,175,185,.025);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(75,214,232,.045), transparent 30%),
+    rgba(125,175,185,.025);
 }
 
 .cc2-subhead {
@@ -408,11 +636,12 @@
   padding: 0 13px;
   border-bottom: 1px solid var(--border);
 }
-.cc2-subhead strong { font-size: 10px; }
+
+.cc2-subhead strong { color: var(--text); font-size: 10px; }
 .cc2-subhead span { color: var(--text-muted); font-size: 8px; }
 
 .cc2-wind-direction-svg { display: block; width: 100%; height: auto; min-height: 250px; color: var(--text-muted); }
-.cc2-wind-direction-svg line { stroke: currentColor; opacity: .13; }
+.cc2-wind-direction-svg line { stroke: var(--border-strong); opacity: .55; }
 .cc2-wind-direction-svg text { fill: currentColor; font-size: 7px; }
 .cc2-wind-direction-svg .axis-title { font-size: 8px; font-weight: 700; }
 
@@ -431,46 +660,77 @@
   color: var(--text-muted);
   font-size: 8px;
 }
-.cc2-wind-legend span { display: inline-flex; align-items: center; gap: 5px; }
-.cc2-wind-legend i { width: 11px; height: 11px; border-radius: 2px; }
-.cc2-wind-legend i.low { background: #8dcc7b; }
-.cc2-wind-legend i.mid { background: #5f79d8; }
-.cc2-wind-legend i.high { background: #ff352f; }
 
-@media (max-width: 1250px) {
-  .cc2-project-air-grid { grid-template-columns: repeat(5,minmax(0,1fr)); }
+.cc2-wind-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.cc2-wind-legend i { width: 10px; height: 10px; border-radius: 3px; }
+.cc2-wind-legend i.low { background: var(--green); }
+.cc2-wind-legend i.mid { background: var(--cyan); }
+.cc2-wind-legend i.high { background: var(--red); }
+
+@media (max-width: 1320px) {
   .cc2-air-split { grid-template-columns: 1fr; }
+  .cc2-project-air-grid { grid-template-columns: repeat(5,minmax(0,1fr)); }
+  .cc2-wind-grid { grid-template-columns: 1fr; }
+  .cc2-windrose-svg { width: min(100%,390px); }
 }
 
 @media (max-width: 900px) {
-  .cc2-flow-grid,
-  .cc2-wind-grid { grid-template-columns: 1fr; }
-  .cc2-water-quality-grid { grid-template-columns: 1fr; }
-  .cc2-water-quality-card { display: grid; grid-template-columns: 1fr .75fr; }
-  .cc2-wq-chart { height: 70px; align-self: end; }
-  .cc2-project-air-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .cc2-water-quality-grid,
+  .cc2-flow-grid { grid-template-columns: 1fr; }
+  .cc2-air-history-layout { grid-template-columns: 1fr; }
+  .cc2-air-history-stats { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .cc2-air-history-stats > div { min-height: 66px; }
 }
 
 @media (max-width: 640px) {
   .cc2-monitor-heading,
-  .cc2-flow-section > header { align-items: flex-start; padding: 14px; flex-wrap: wrap; }
+  .cc2-flow-section > header {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    padding: 14px;
+  }
+
+  .cc2-monitor-heading-icon { width: 34px; height: 34px; flex-basis: 34px; }
+  .cc2-monitor-heading h2,
+  .cc2-flow-section > header h2 { font-size: 15px; }
   .cc2-monitor-demo,
-  .cc2-flow-section > header > span { margin-left: 49px !important; }
+  .cc2-flow-section > header > span { margin-left: 45px !important; }
+
   .cc2-water-quality-grid,
-  .cc2-flow-grid,
-  .cc2-air-split,
-  .cc2-wind-grid { padding: 10px; gap: 9px; }
-  .cc2-water-quality-card { display: block; }
-  .cc2-wq-top { grid-template-columns: 27px minmax(0,1fr) auto; padding-inline: 10px; }
-  .cc2-wq-top b { font-size: 19px; }
-  .cc2-flow-top { grid-template-columns: 27px minmax(0,1fr); padding: 12px; }
-  .cc2-flow-dot { width: 25px; height: 25px; }
-  .cc2-flow-top b { grid-column: 1 / -1; padding-left: 37px; font-size: 25px; }
-  .cc2-air-public-main { grid-template-columns: 92px 1fr; padding: 12px; }
-  .cc2-air-aqi { min-height: 112px; }
-  .cc2-air-aqi strong { font-size: 36px; }
-  .cc2-project-air-grid { grid-template-columns: repeat(2,minmax(0,1fr)); padding: 10px; }
-  .cc2-air-history-chart { gap: 1px; overflow: hidden; }
-  .cc2-air-bar:nth-child(even) b { visibility: hidden; }
-  .cc2-wind-direction-svg { min-height: 210px; }
+  .cc2-flow-grid { gap: 9px; padding: 10px; }
+  .cc2-wq-top { grid-template-columns: 30px minmax(0,1fr); }
+  .cc2-wq-top b { grid-column: 2; font-size: 20px; }
+  .cc2-flow-top { grid-template-columns: 28px minmax(0,1fr); min-height: 105px; }
+  .cc2-flow-top b { grid-column: 2; font-size: 25px; }
+
+  .cc2-air-split { gap: 10px; padding: 8px 10px 10px; }
+  .cc2-air-public-main { grid-template-columns: 1fr; }
+  .cc2-air-aqi { min-height: 90px; }
+  .cc2-project-air-grid { grid-template-columns: repeat(3,minmax(0,1fr)); padding: 10px; }
+  .cc2-project-air-grid > div { min-height: 62px; }
+
+  .cc2-air-history { margin: 4px 10px 10px; }
+  .cc2-air-history-head { flex-direction: column; padding: 11px 10px 8px; }
+  .cc2-air-range { align-self: stretch; }
+  .cc2-air-range button { flex: 1; }
+  .cc2-air-tabs { overflow-x: auto; padding-inline: 10px; }
+  .cc2-air-tabs button { min-width: 72px; }
+  .cc2-air-history-layout { padding: 10px; }
+  .cc2-air-history-chart-shell { overflow-x: auto; min-width: 0; padding-left: 35px; }
+  .cc2-air-history-chart { min-width: 650px; height: 190px; }
+  .cc2-air-y-axis { position: sticky; left: 0; z-index: 2; }
+  .cc2-air-bar b { opacity: .28; }
+  .cc2-air-bar.selected b { opacity: 1; }
+  .cc2-air-history-stats { grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+  .cc2-air-history-stats strong { font-size: 19px; }
+
+  .cc2-wind-grid { gap: 9px; padding: 8px 10px 10px; }
+  .cc2-wind-direction-card { overflow-x: auto; }
+  .cc2-wind-direction-svg { min-width: 720px; }
+}
+
+@media (max-width: 430px) {
+  .cc2-project-air-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .cc2-air-history-stats { grid-template-columns: 1fr; }
+  .cc2-air-public footer { align-items: flex-start; flex-direction: column; }
 }
