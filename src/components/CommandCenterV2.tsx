@@ -16,6 +16,7 @@ import "./CommandCenterV2.status.css";
 import "./CommandCenterV2.final.css";
 import "./CommandCenterV2.review.css";
 import "./ProjectIdentity.css";
+import "./DwrBrandTheme.css";
 
 export interface CommandCenterV2Props {
   iTwinId: string;
@@ -46,7 +47,7 @@ const SOURCE_ITEMS = [
 export function CommandCenterV2(_props: CommandCenterV2Props) {
   const [activeMenu, setActiveMenu] = useState<MenuKey>("overview");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isLight, setIsLight] = useState(false);
+  const [isLight, setIsLight] = useState(true);
   const [now, setNow] = useState(new Date());
   const [environment, setEnvironment] = useState<EnvironmentData>(FALLBACK_ENVIRONMENT);
   const [fallbackMode, setFallbackMode] = useState(true);
@@ -85,12 +86,6 @@ export function CommandCenterV2(_props: CommandCenterV2Props) {
     return () => window.clearInterval(timer);
   }, [refreshEnvironment]);
 
-  /*
-   * The 24-hour air chart is intentionally horizontally scrollable so 20-minute
-   * readings stay legible. Always open it at the latest reading, and return to
-   * the latest edge after changing metric/range. Otherwise the first frame shows
-   * older readings and makes the visible right edge look like it is not "now".
-   */
   useEffect(() => {
     if (activeMenu !== "environment") return;
 
