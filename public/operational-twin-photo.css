@@ -1,57 +1,38 @@
-/* Overview Operational Twin photo override.
-   The supplied project image is rendered as a real <img> element by src/index.tsx. */
+/* Operational Twin overview photo — direct React <img>, no map/background hacks. */
 
-.cc2-ops-grid > .cc2-panel:first-child .cc2-map {
-  position: relative !important;
-  height: clamp(340px, 35vw, 500px) !important;
-  overflow: hidden !important;
-  border: 1px solid rgba(41, 101, 145, 0.16) !important;
-  border-radius: 16px !important;
-  background: #dfe8ee !important;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12) !important;
+.cc2-operational-photo-direct {
+  position: relative;
+  height: clamp(340px, 35vw, 500px);
+  margin: 0 14px 14px;
+  overflow: hidden;
+  border: 1px solid rgba(41, 101, 145, 0.16);
+  border-radius: 16px;
+  background: #dfe8ee;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12);
 }
 
-.cc2-ops-grid > .cc2-panel:first-child .cc2-map::before {
-  display: none !important;
-}
-
-/* Hide only the old schematic-map UI. Do NOT hide every child: the photo is a real <img>. */
-.cc2-ops-grid > .cc2-panel:first-child .cc2-map > .cc2-map-meta,
-.cc2-ops-grid > .cc2-panel:first-child .cc2-map > .cc2-map-svg,
-.cc2-ops-grid > .cc2-panel:first-child .cc2-map > .cc2-map-tools,
-.cc2-ops-grid > .cc2-panel:first-child .cc2-map > .cc2-map-coordinate,
-.cc2-ops-grid > .cc2-panel:first-child .cc2-map > .cc2-map-legend {
-  display: none !important;
-}
-
-.cc2-ops-grid > .cc2-panel:first-child .cc2-map > .cc2-operational-photo {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  display: block !important;
+.cc2-operational-photo-direct img {
+  display: block;
   width: 100%;
   height: 100%;
-  max-width: none;
   object-fit: cover;
   object-position: center;
-  user-select: none;
 }
 
-.cc2-ops-grid > .cc2-panel:first-child .cc2-map::after {
+.cc2-operational-photo-direct::after {
   content: 'ภาพพื้นที่โครงการ';
   position: absolute;
   right: 14px;
   bottom: 14px;
-  z-index: 3;
   display: inline-flex;
   align-items: center;
   min-height: 28px;
   padding: 0 10px;
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  border: 1px solid rgba(255,255,255,0.28);
   border-radius: 999px;
-  color: #ffffff;
-  background: rgba(11, 52, 80, 0.70);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+  color: #fff;
+  background: rgba(11,52,80,0.70);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.16);
   backdrop-filter: blur(8px);
   font-size: 8px;
   font-weight: 700;
@@ -59,18 +40,18 @@
 }
 
 @media (max-width: 900px) {
-  .cc2-ops-grid > .cc2-panel:first-child .cc2-map {
-    height: clamp(280px, 58vw, 410px) !important;
+  .cc2-operational-photo-direct {
+    height: clamp(280px, 58vw, 410px);
   }
 }
 
 @media (max-width: 560px) {
-  .cc2-ops-grid > .cc2-panel:first-child .cc2-map {
-    height: 260px !important;
-    margin: 10px !important;
+  .cc2-operational-photo-direct {
+    height: 260px;
+    margin: 10px;
   }
 
-  .cc2-ops-grid > .cc2-panel:first-child .cc2-map::after {
+  .cc2-operational-photo-direct::after {
     right: 9px;
     bottom: 9px;
   }
