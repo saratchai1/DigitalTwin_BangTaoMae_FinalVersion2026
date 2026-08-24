@@ -5,6 +5,7 @@ import { sourceDisplayState, sourceStateLabel } from "./CommandCenterV2Policy";
 import { OverviewPage } from "./CommandCenterV2Overview";
 import { EnvironmentPage, SurveillancePage, WaterPage } from "./CommandCenterV2Pages";
 import { HighwayLiveCCTV } from "./HighwayLiveCCTV";
+import { ProjectPartners } from "./ProjectPartners";
 import "./CommandCenterV2.core.css";
 import "./CommandCenterV2.overview.css";
 import "./CommandCenterV2.pages.css";
@@ -197,6 +198,7 @@ export function CommandCenterV2(_props: CommandCenterV2Props) {
           <div className="cc2-page">
             {activeMenu === "overview" && (
               <>
+                <ProjectPartners />
                 <OverviewPage environment={environment} fallbackMode={fallbackMode} onOpenWater={() => navigate("water")} />
                 <HighwayLiveCCTV compact />
               </>
