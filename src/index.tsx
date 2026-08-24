@@ -4,10 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 import "./index.css";
+import operationalTwinPhoto from "./assets/operational-twin-reservoir.webp";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "@tanstack/react-router";
 import { router } from "./components/Routes";
+
+document.documentElement.style.setProperty(
+  "--cc2-operational-twin-photo",
+  `url("${operationalTwinPhoto}")`,
+);
 
 const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("Root element not found");
