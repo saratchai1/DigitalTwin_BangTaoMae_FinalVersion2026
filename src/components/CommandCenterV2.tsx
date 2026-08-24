@@ -5,7 +5,9 @@ import { sourceDisplayState, sourceStateLabel } from "./CommandCenterV2Policy";
 import { OverviewPage } from "./CommandCenterV2Overview";
 import { EnvironmentPage, SurveillancePage, WaterPage } from "./CommandCenterV2Pages";
 import { HighwayLiveCCTV } from "./HighwayLiveCCTV";
-import { ProjectPartners } from "./ProjectPartners";
+import dwrLogo from "../assets/partners/dwr.webp";
+import khaotorLogo from "../assets/partners/khaotor.webp";
+import cnexLogo from "../assets/partners/cnex.webp";
 import "./CommandCenterV2.core.css";
 import "./CommandCenterV2.overview.css";
 import "./CommandCenterV2.pages.css";
@@ -13,6 +15,7 @@ import "./CommandCenterV2.responsive.css";
 import "./CommandCenterV2.status.css";
 import "./CommandCenterV2.final.css";
 import "./CommandCenterV2.review.css";
+import "./ProjectIdentity.css";
 
 export interface CommandCenterV2Props {
   iTwinId: string;
@@ -138,8 +141,8 @@ export function CommandCenterV2(_props: CommandCenterV2Props) {
     <div className="cc2-app">
       <aside className={`cc2-rail ${mobileMenuOpen ? "open" : ""}`}>
         <div className="cc2-brand">
-          <div className="cc2-brand-mark"><Waves size={24} /></div>
-          <div><p>BANG TAO MAE</p><h2>Command Center</h2></div>
+          <div className="cc2-brand-mark cc2-owner-brand"><img src={dwrLogo} alt="กรมทรัพยากรน้ำ" /></div>
+          <div className="cc2-owner-copy"><p>เจ้าของโครงการ · DWR</p><h2>กรมทรัพยากรน้ำ</h2><span>Bang Tao Mae Command Center</span></div>
           <button type="button" className="cc2-close" onClick={() => setMobileMenuOpen(false)} aria-label="ปิดเมนู"><X size={19} /></button>
         </div>
 
@@ -187,6 +190,16 @@ export function CommandCenterV2(_props: CommandCenterV2Props) {
             <div><p>{page.kicker}</p><h1>{page.title}</h1><span>{page.description}</span></div>
           </div>
           <div className="cc2-topbar-actions">
+            <div className="cc2-project-roles" aria-label="บทบาทหน่วยงานในโครงการ">
+              <div className="cc2-project-role site">
+                <span className="cc2-project-role-logo"><img src={khaotorLogo} alt="องค์การบริหารส่วนตำบลเขาต่อ" /></span>
+                <span className="cc2-project-role-copy"><small>เจ้าของพื้นที่</small><strong>อบต.เขาต่อ</strong></span>
+              </div>
+              <div className="cc2-project-role contractor">
+                <span className="cc2-project-role-logo"><img src={cnexLogo} alt="CNEX Consortium" /></span>
+                <span className="cc2-project-role-copy"><small>ผู้รับจ้าง</small><strong>CNEX</strong></span>
+              </div>
+            </div>
             <div className={`cc2-sync-chip ${fallbackMode || hasSourceIssue ? "fallback" : ""}`} aria-live="polite"><i /> {syncText}</div>
             <button type="button" className="cc2-icon-button" onClick={() => void refreshEnvironment()} disabled={refreshing} aria-label="อัปเดตข้อมูล"><RefreshCw size={16} className={refreshing ? "spin" : ""} /></button>
             <button type="button" className="cc2-icon-button cc2-theme-button" onClick={() => setIsLight((current) => !current)} aria-label={isLight ? "เปลี่ยนเป็นโหมดมืด" : "เปลี่ยนเป็นโหมดสว่าง"}>{isLight ? <Moon size={16} /> : <Sun size={16} />}</button>
@@ -198,7 +211,6 @@ export function CommandCenterV2(_props: CommandCenterV2Props) {
           <div className="cc2-page">
             {activeMenu === "overview" && (
               <>
-                <ProjectPartners />
                 <OverviewPage environment={environment} fallbackMode={fallbackMode} onOpenWater={() => navigate("water")} />
                 <HighwayLiveCCTV compact />
               </>
