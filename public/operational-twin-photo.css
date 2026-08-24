@@ -15,7 +15,12 @@
   display: none !important;
 }
 
-.cc2-ops-grid > .cc2-panel:first-child .cc2-map > * {
+/* Hide only the old schematic-map UI. Do NOT hide every child: the photo is a real <img>. */
+.cc2-ops-grid > .cc2-panel:first-child .cc2-map > .cc2-map-meta,
+.cc2-ops-grid > .cc2-panel:first-child .cc2-map > .cc2-map-svg,
+.cc2-ops-grid > .cc2-panel:first-child .cc2-map > .cc2-map-tools,
+.cc2-ops-grid > .cc2-panel:first-child .cc2-map > .cc2-map-coordinate,
+.cc2-ops-grid > .cc2-panel:first-child .cc2-map > .cc2-map-legend {
   display: none !important;
 }
 
