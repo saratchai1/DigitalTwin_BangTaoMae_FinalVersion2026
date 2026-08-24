@@ -1,0 +1,156 @@
+.cc2-brand-mark.cc2-owner-brand {
+  overflow: hidden;
+  padding: 4px;
+  border-color: rgba(74, 180, 224, 0.24);
+  background: linear-gradient(145deg, #ffffff, #f0f5f7);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
+}
+
+.cc2-owner-brand img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.cc2-owner-copy {
+  min-width: 0;
+}
+
+.cc2-owner-copy p {
+  color: var(--cyan) !important;
+  font-size: 7px !important;
+  letter-spacing: 0.11em !important;
+}
+
+.cc2-owner-copy h2 {
+  overflow: hidden;
+  max-width: 150px;
+  font-size: 15px !important;
+  line-height: 1.25 !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cc2-owner-copy > span {
+  display: block;
+  margin-top: 3px;
+  color: var(--text-dim);
+  font-size: 7px;
+  line-height: 1.2;
+  letter-spacing: 0.045em;
+}
+
+.cc2-project-roles {
+  display: flex;
+  align-items: stretch;
+  gap: 7px;
+  margin-right: 2px;
+  padding-right: 9px;
+  border-right: 1px solid var(--border);
+}
+
+.cc2-project-role {
+  display: flex;
+  min-height: 42px;
+  min-width: 122px;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 8px 5px 5px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(125, 175, 185, 0.035);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.cc2-project-role.site {
+  border-color: rgba(240, 198, 79, 0.18);
+}
+
+.cc2-project-role.contractor {
+  border-color: rgba(75, 214, 232, 0.15);
+}
+
+.cc2-project-role-logo {
+  display: grid;
+  width: 34px;
+  height: 32px;
+  flex: 0 0 34px;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.13);
+}
+
+.cc2-project-role.contractor .cc2-project-role-logo {
+  width: 48px;
+  flex-basis: 48px;
+}
+
+.cc2-project-role-logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 3px;
+}
+
+.cc2-project-role.contractor .cc2-project-role-logo img {
+  padding: 4px;
+}
+
+.cc2-project-role-copy {
+  min-width: 0;
+}
+
+.cc2-project-role-copy small,
+.cc2-project-role-copy strong {
+  display: block;
+}
+
+.cc2-project-role-copy small {
+  margin-bottom: 2px;
+  color: var(--text-dim);
+  font-size: 6px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cc2-project-role-copy strong {
+  overflow: hidden;
+  max-width: 75px;
+  color: var(--text);
+  font-size: 8px;
+  line-height: 1.25;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:root[data-theme="light"] .cc2-project-role {
+  background: rgba(255, 255, 255, 0.62);
+}
+
+@media (max-width: 1390px) {
+  .cc2-project-role {
+    min-width: 104px;
+  }
+
+  .cc2-project-role-copy strong {
+    max-width: 60px;
+  }
+}
+
+@media (max-width: 1220px) {
+  .cc2-project-roles {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .cc2-owner-copy h2 {
+    max-width: 180px;
+  }
+}
