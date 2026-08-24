@@ -9,6 +9,7 @@ import {
   Wind,
   X,
 } from "lucide-react";
+import operationalTwinPhoto from "../assets/operational-twin-reservoir.webp";
 import {
   FALLBACK_ENVIRONMENT,
   STATIONS,
@@ -25,7 +26,7 @@ import {
   sourceStateLabel,
   type SourceDisplayState,
 } from "./CommandCenterV2Policy";
-import { OperationalMap, PanelHeading, RainPanel, StationTable, StatusTag } from "./CommandCenterV2Shared";
+import { PanelHeading, RainPanel, StationTable, StatusTag } from "./CommandCenterV2Shared";
 import { WaterQualityPanel } from "./CommandCenterV2Monitoring";
 
 const SOURCE_SUMMARY = [
@@ -215,7 +216,9 @@ export function OverviewPage({
             title="โครงข่ายน้ำและจุดตรวจวัด"
             action={<button className="cc2-primary-action" onClick={onOpenWater}>เปิดเครือข่ายน้ำ <ChevronRight size={14} /></button>}
           />
-          <OperationalMap onOpenWater={onOpenWater} />
+          <div className="cc2-operational-photo-direct">
+            <img src={operationalTwinPhoto} alt="ภาพพื้นที่โครงการบางเท่าแม่" />
+          </div>
         </article>
 
         <aside className="cc2-panel cc2-command-panel">
