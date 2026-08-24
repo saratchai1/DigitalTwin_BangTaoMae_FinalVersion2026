@@ -1,0 +1,649 @@
+/*
+ * DWR brand layer
+ * Translates the Department of Water Resources public-site identity into an
+ * operational dashboard: official white/blue surfaces, DWR sky blue, deep
+ * institutional navy, and restrained gold authority accents.
+ * Loaded last so monitoring/data logic and component layout remain untouched.
+ */
+
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+  --dwr-navy: #174c7a;
+  --dwr-navy-deep: #0f3c66;
+  --dwr-blue: #2f78ad;
+  --dwr-sky: #389dc7;
+  --dwr-sky-bright: #28a8da;
+  --dwr-gold: #d5aa2f;
+  --dwr-gold-deep: #a57d0c;
+  --dwr-ice: #edf7fb;
+
+  --bg: #f3f7fb;
+  --bg-soft: #eaf2f8;
+  --sidebar: #174c7a;
+  --surface: rgba(255, 255, 255, 0.97);
+  --surface-solid: #ffffff;
+  --surface-hover: rgba(47, 120, 173, 0.07);
+  --border: rgba(41, 101, 145, 0.14);
+  --border-strong: rgba(41, 101, 145, 0.26);
+  --text: #15344d;
+  --text-muted: #5f7485;
+  --text-dim: #8799a7;
+  --cyan: #258fbf;
+  --cyan-soft: rgba(56, 157, 199, 0.10);
+  --blue: #2f78ad;
+  --violet: #6379a8;
+  --green: #178a54;
+  --amber: #c98a08;
+  --red: #d43b4e;
+  --grid-line: rgba(39, 104, 151, 0.09);
+  --shadow: 0 22px 58px rgba(24, 67, 99, 0.13);
+  --shadow-soft: 0 10px 30px rgba(31, 78, 111, 0.085);
+
+  --cc2-status-green: #178a54;
+  --cc2-status-amber: #c98a08;
+  --cc2-status-red: #d43b4e;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --dwr-navy: #15547f;
+  --dwr-navy-deep: #082d4d;
+  --dwr-blue: #4b9bcb;
+  --dwr-sky: #52b7da;
+  --dwr-sky-bright: #5bc5e8;
+  --dwr-gold: #e4bd50;
+  --dwr-gold-deep: #d3a72e;
+  --dwr-ice: #0b2940;
+
+  --bg: #071d2d;
+  --bg-soft: #0a2639;
+  --sidebar: #082d4d;
+  --surface: rgba(12, 42, 62, 0.94);
+  --surface-solid: #0d2c41;
+  --surface-hover: rgba(91, 197, 232, 0.09);
+  --border: rgba(126, 190, 220, 0.16);
+  --border-strong: rgba(126, 190, 220, 0.28);
+  --text: #f4f8fb;
+  --text-muted: #aec1cf;
+  --text-dim: #7894a7;
+  --cyan: #5bc5e8;
+  --cyan-soft: rgba(91, 197, 232, 0.10);
+  --blue: #74b7df;
+  --violet: #9aaee2;
+  --green: #4fd392;
+  --amber: #e4bd50;
+  --red: #ff7383;
+  --grid-line: rgba(126, 190, 220, 0.09);
+  --shadow: 0 24px 68px rgba(0, 0, 0, 0.28);
+  --shadow-soft: 0 14px 42px rgba(0, 0, 0, 0.18);
+
+  --cc2-status-green: #4fd392;
+  --cc2-status-amber: #e4bd50;
+  --cc2-status-red: #ff7383;
+}
+
+body {
+  background:
+    radial-gradient(circle at 84% -12%, rgba(56, 157, 199, 0.13), transparent 34%),
+    radial-gradient(circle at 9% 104%, rgba(213, 170, 47, 0.06), transparent 28%),
+    linear-gradient(180deg, #f7fafc 0%, var(--bg) 42%, #eef5fa 100%);
+}
+
+:root[data-theme="dark"] body {
+  background:
+    radial-gradient(circle at 80% -15%, rgba(82, 183, 218, 0.13), transparent 34%),
+    radial-gradient(circle at 5% 110%, rgba(228, 189, 80, 0.05), transparent 28%),
+    var(--bg);
+}
+
+/* Institutional navigation: persistent DWR ownership */
+.cc2-rail,
+:root[data-theme="light"] .cc2-rail,
+:root[data-theme="dark"] .cc2-rail {
+  border-right: 0;
+  color: #ffffff;
+  background:
+    radial-gradient(circle at 12% -4%, rgba(70, 177, 220, 0.28), transparent 31%),
+    linear-gradient(180deg, #1b608f 0%, #174c7a 47%, #103d65 100%);
+  box-shadow: 14px 0 38px rgba(19, 65, 98, 0.14);
+}
+
+.cc2-rail::after {
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--dwr-gold) 0 12%, rgba(255,255,255,0.26) 12% 60%, rgba(40,168,218,0.7) 60% 100%);
+  opacity: 0.8;
+}
+
+.cc2-brand {
+  min-height: 60px;
+  padding-inline: 4px;
+}
+
+.cc2-brand-mark.cc2-owner-brand {
+  width: 52px;
+  height: 52px;
+  flex-basis: 52px;
+  padding: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 13px;
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(8, 35, 58, 0.24);
+}
+
+.cc2-owner-copy p,
+.cc2-brand p {
+  color: #f4d777 !important;
+  letter-spacing: 0.11em !important;
+}
+
+.cc2-owner-copy h2,
+.cc2-brand h2 {
+  color: #ffffff !important;
+  font-weight: 750 !important;
+}
+
+.cc2-owner-copy > span {
+  color: rgba(255, 255, 255, 0.64) !important;
+}
+
+.cc2-online-pill {
+  border-color: rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.075);
+}
+
+.cc2-online-pill strong {
+  color: #91e1bb;
+}
+
+.cc2-nav > p {
+  color: rgba(255, 255, 255, 0.47);
+}
+
+.cc2-nav > button {
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.cc2-nav > button:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.085);
+}
+
+.cc2-nav > button.active {
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #153f62;
+  background: linear-gradient(90deg, #ffffff, #edf8fd);
+  box-shadow: 0 8px 22px rgba(7, 39, 64, 0.18);
+}
+
+.cc2-nav > button::before {
+  left: -4px;
+  width: 4px;
+  background: var(--dwr-gold);
+}
+
+.cc2-nav > button.active .cc2-nav-icon {
+  color: #1e79ad;
+  background: rgba(56, 157, 199, 0.13);
+}
+
+.cc2-nav > button.active .cc2-nav-copy small {
+  color: #6d8799;
+}
+
+.cc2-nav > button.active .cc2-nav-chevron {
+  color: #1e79ad;
+}
+
+.cc2-nav-icon {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.cc2-source-card {
+  border-color: rgba(255, 255, 255, 0.13);
+  background: rgba(4, 40, 66, 0.30);
+}
+
+.cc2-source-title strong,
+.cc2-source-row {
+  color: rgba(255, 255, 255, 0.80);
+}
+
+.cc2-source-title span {
+  color: #8edfc0;
+}
+
+.cc2-source-row {
+  border-top-color: rgba(255, 255, 255, 0.09);
+}
+
+.cc2-source-row em {
+  color: rgba(255, 255, 255, 0.50);
+}
+
+.cc2-monitoring-note {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: rgba(255, 255, 255, 0.72) !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+}
+
+.cc2-monitoring-note strong {
+  color: rgba(255, 255, 255, 0.90) !important;
+}
+
+.cc2-monitoring-note span {
+  color: rgba(255, 255, 255, 0.53) !important;
+}
+
+/* DWR public-service header */
+.cc2-topbar,
+:root[data-theme="light"] .cc2-topbar {
+  min-height: 92px;
+  border-top: 4px solid var(--dwr-gold);
+  border-bottom: 1px solid rgba(34, 102, 151, 0.16);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 7px 24px rgba(30, 76, 109, 0.08);
+  backdrop-filter: blur(20px) saturate(120%);
+}
+
+:root[data-theme="dark"] .cc2-topbar {
+  border-top-color: var(--dwr-gold);
+  border-bottom-color: rgba(126, 190, 220, 0.16);
+  background: rgba(8, 39, 59, 0.95);
+}
+
+.cc2-topbar::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  pointer-events: none;
+  background: linear-gradient(90deg, var(--dwr-blue) 0 34%, var(--dwr-sky) 34% 78%, transparent 78%);
+  opacity: 0.72;
+}
+
+.cc2-topbar-title p {
+  color: var(--dwr-gold-deep);
+  letter-spacing: 0.16em;
+}
+
+.cc2-topbar-title h1 {
+  color: var(--dwr-navy-deep);
+  font-weight: 760;
+}
+
+.cc2-topbar-title span {
+  color: #6d8190;
+}
+
+:root[data-theme="dark"] .cc2-topbar-title h1 {
+  color: #f6fbff;
+}
+
+:root[data-theme="dark"] .cc2-topbar-title span {
+  color: var(--text-muted);
+}
+
+.cc2-icon-button,
+.cc2-sync-chip,
+.cc2-clock,
+.cc2-simulation-badge {
+  border-color: rgba(41, 101, 145, 0.15);
+  background: #f8fbfd;
+}
+
+:root[data-theme="dark"] .cc2-icon-button,
+:root[data-theme="dark"] .cc2-sync-chip,
+:root[data-theme="dark"] .cc2-clock,
+:root[data-theme="dark"] .cc2-simulation-badge {
+  border-color: var(--border);
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.cc2-clock strong {
+  color: var(--dwr-navy-deep);
+}
+
+:root[data-theme="dark"] .cc2-clock strong {
+  color: var(--text);
+}
+
+/* Role identity is subordinate to DWR ownership */
+.cc2-project-role {
+  border-color: rgba(41, 101, 145, 0.13);
+  background: #f8fbfd;
+}
+
+.cc2-project-role.site {
+  border-color: rgba(213, 170, 47, 0.30);
+  background: #fffdf5;
+}
+
+.cc2-project-role.contractor {
+  border-color: rgba(56, 157, 199, 0.22);
+  background: #f5fbfe;
+}
+
+:root[data-theme="dark"] .cc2-project-role,
+:root[data-theme="dark"] .cc2-project-role.site,
+:root[data-theme="dark"] .cc2-project-role.contractor {
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.cc2-project-role-copy small {
+  color: #8294a2;
+}
+
+.cc2-project-role-copy strong {
+  color: #234760;
+}
+
+:root[data-theme="dark"] .cc2-project-role-copy strong {
+  color: var(--text);
+}
+
+/* Main canvas */
+.cc2-page {
+  padding-top: 24px;
+}
+
+.cc2-panel,
+.cc2-monitor-panel,
+.cc2-air-intelligence,
+.cc2-wind-intelligence,
+.cc2-flow-section,
+.cc2-highway-cctv {
+  border-color: rgba(38, 104, 150, 0.14);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(250, 253, 255, 0.97)),
+    var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+
+:root[data-theme="dark"] .cc2-panel,
+:root[data-theme="dark"] .cc2-monitor-panel,
+:root[data-theme="dark"] .cc2-air-intelligence,
+:root[data-theme="dark"] .cc2-wind-intelligence,
+:root[data-theme="dark"] .cc2-flow-section,
+:root[data-theme="dark"] .cc2-highway-cctv {
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.018), transparent 50%),
+    var(--surface);
+}
+
+.cc2-panel-title p,
+.cc2-monitor-heading p,
+.cc2-flow-section > header p,
+.cc2-project-air-head p,
+.cc2-air-public-head p,
+.cc2-highway-cctv-title p {
+  color: var(--dwr-blue);
+  letter-spacing: 0.12em;
+}
+
+.cc2-panel-title h2,
+.cc2-monitor-heading h2,
+.cc2-flow-section > header h2,
+.cc2-highway-cctv-title h2 {
+  color: var(--dwr-navy-deep);
+}
+
+:root[data-theme="dark"] .cc2-panel-title h2,
+:root[data-theme="dark"] .cc2-monitor-heading h2,
+:root[data-theme="dark"] .cc2-flow-section > header h2,
+:root[data-theme="dark"] .cc2-highway-cctv-title h2 {
+  color: var(--text);
+}
+
+/* Executive mission card: official DWR blue, status remains traffic-light */
+.cc2-mission {
+  border-color: rgba(40, 109, 157, 0.16);
+  background:
+    radial-gradient(circle at 3% -20%, rgba(56, 157, 199, 0.12), transparent 32%),
+    radial-gradient(circle at 96% -12%, rgba(213, 170, 47, 0.08), transparent 31%),
+    linear-gradient(180deg, #ffffff, #f9fcfe);
+  box-shadow: 0 13px 36px rgba(29, 76, 111, 0.09);
+}
+
+:root[data-theme="dark"] .cc2-mission {
+  background:
+    radial-gradient(circle at 3% -20%, rgba(82, 183, 218, 0.12), transparent 32%),
+    radial-gradient(circle at 96% -12%, rgba(228, 189, 80, 0.07), transparent 31%),
+    var(--surface);
+}
+
+.cc2-mission::before {
+  opacity: 0.18;
+  background-image:
+    linear-gradient(rgba(47, 120, 173, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(47, 120, 173, 0.045) 1px, transparent 1px);
+}
+
+.cc2-vital,
+.cc2-weather-grid div {
+  border: 1px solid rgba(41, 101, 145, 0.11);
+  background: #f7fbfe;
+}
+
+:root[data-theme="dark"] .cc2-vital,
+:root[data-theme="dark"] .cc2-weather-grid div {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.cc2-vital-head svg,
+.cc2-monitor-heading-icon,
+.cc2-wq-icon {
+  color: var(--dwr-blue);
+}
+
+.cc2-monitor-heading-icon,
+.cc2-wq-icon {
+  border-color: rgba(56, 157, 199, 0.22);
+  background: rgba(56, 157, 199, 0.08);
+}
+
+.cc2-weather-icon {
+  border-color: rgba(213, 170, 47, 0.26);
+  color: var(--dwr-gold-deep);
+  background: rgba(213, 170, 47, 0.10);
+}
+
+/* Water and environmental monitoring */
+.cc2-water-quality,
+.cc2-flow-section,
+.cc2-air-intelligence,
+.cc2-wind-intelligence {
+  border-color: rgba(56, 157, 199, 0.18);
+}
+
+.cc2-water-quality-card,
+.cc2-flow-card,
+.cc2-air-public,
+.cc2-project-air,
+.cc2-air-public-metrics > div,
+.cc2-air-aqi {
+  border-color: rgba(41, 101, 145, 0.13);
+  background: #f7fbfd;
+}
+
+:root[data-theme="dark"] .cc2-water-quality-card,
+:root[data-theme="dark"] .cc2-flow-card,
+:root[data-theme="dark"] .cc2-air-public,
+:root[data-theme="dark"] .cc2-project-air,
+:root[data-theme="dark"] .cc2-air-public-metrics > div,
+:root[data-theme="dark"] .cc2-air-aqi {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.cc2-water-quality-card {
+  box-shadow: inset 0 3px 0 rgba(56, 157, 199, 0.72);
+}
+
+.cc2-flow-card {
+  box-shadow: inset 0 3px 0 rgba(47, 120, 173, 0.70);
+}
+
+.cc2-monitor-spark-line,
+.cc2-water-quality-card .cc2-monitor-spark-line,
+.cc2-flow-card .cc2-monitor-spark-line {
+  stroke: var(--dwr-sky);
+  filter: drop-shadow(0 0 2px rgba(56, 157, 199, 0.20));
+}
+
+.cc2-monitor-spark-fill,
+.cc2-flow-card .cc2-monitor-spark-fill {
+  fill: rgba(56, 157, 199, 0.10);
+}
+
+.cc2-water-quality-card .cc2-monitor-spark-fill {
+  fill: rgba(56, 157, 199, 0.09);
+}
+
+.cc2-flow-dot {
+  border-color: rgba(56, 157, 199, 0.13);
+  background: var(--dwr-sky);
+  box-shadow: 0 0 18px rgba(56, 157, 199, 0.16);
+}
+
+/* Map remains darker for geospatial contrast, but is DWR navy rather than teal/black. */
+.cc2-map {
+  border-color: rgba(56, 157, 199, 0.22);
+  background: #0d3553;
+  box-shadow: inset 0 0 42px rgba(6, 30, 48, 0.30);
+}
+
+.cc2-map::before {
+  background-image:
+    radial-gradient(circle at 14% 20%, rgba(82, 183, 218, 0.18), transparent 22%),
+    radial-gradient(circle at 78% 76%, rgba(213, 170, 47, 0.05), transparent 25%),
+    linear-gradient(rgba(114, 181, 216, 0.075) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(114, 181, 216, 0.075) 1px, transparent 1px);
+}
+
+.cc2-map-chip,
+.cc2-map-tools button,
+.cc2-map-legend,
+.cc2-map-coordinate {
+  border-color: rgba(181, 220, 239, 0.15);
+  color: #c3d8e5;
+  background: rgba(8, 42, 66, 0.82);
+}
+
+/* CCTV chrome gets DWR branding while video itself remains neutral. */
+.cc2-highway-cctv-head {
+  border-bottom-color: rgba(41, 101, 145, 0.13);
+  background: linear-gradient(90deg, rgba(56, 157, 199, 0.055), transparent 46%);
+}
+
+.cc2-highway-cctv-icon {
+  border-color: rgba(56, 157, 199, 0.24);
+  color: var(--dwr-blue);
+  background: rgba(56, 157, 199, 0.09);
+}
+
+.cc2-highway-cctv-meta {
+  background: rgba(41, 101, 145, 0.12);
+}
+
+.cc2-highway-cctv-meta > div,
+.cc2-highway-cctv-meta > a {
+  background: #fbfdff;
+}
+
+:root[data-theme="dark"] .cc2-highway-cctv-meta > div,
+:root[data-theme="dark"] .cc2-highway-cctv-meta > a {
+  background: var(--surface);
+}
+
+/* Status language stays explicit and saturated against the lighter public-sector canvas. */
+.cc2-status-key {
+  border-color: rgba(41, 101, 145, 0.13) !important;
+  background: #ffffff !important;
+  box-shadow: var(--shadow-soft);
+}
+
+:root[data-theme="dark"] .cc2-status-key {
+  background: var(--surface) !important;
+}
+
+.cc2-status-key .normal {
+  background: rgba(23, 138, 84, 0.07) !important;
+}
+
+.cc2-status-key .watch {
+  background: rgba(201, 138, 8, 0.08) !important;
+}
+
+.cc2-status-key .critical {
+  background: rgba(212, 59, 78, 0.07) !important;
+}
+
+/* Form-like controls and chips */
+.cc2-primary-action,
+.cc2-panel-link,
+.cc2-alert-actions button,
+.cc2-decision button {
+  border-color: rgba(47, 120, 173, 0.25) !important;
+}
+
+.cc2-primary-action {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #2f78ad, #258fbf) !important;
+  box-shadow: 0 8px 18px rgba(47, 120, 173, 0.18);
+}
+
+.cc2-primary-action:hover {
+  background: linear-gradient(135deg, #276b9d, #1d82b2) !important;
+}
+
+.cc2-tag.online,
+.cc2-live-chip,
+.cc2-highway-live-badge.live {
+  box-shadow: none !important;
+}
+
+/* Mobile: official white bottom navigation with DWR-blue active state. */
+@media (max-width: 900px) {
+  .cc2-bottom-nav {
+    border-color: rgba(41, 101, 145, 0.17) !important;
+    background: rgba(255, 255, 255, 0.97) !important;
+    box-shadow: 0 14px 34px rgba(21, 73, 108, 0.17) !important;
+  }
+
+  :root[data-theme="dark"] .cc2-bottom-nav {
+    background: rgba(8, 39, 59, 0.97) !important;
+  }
+
+  .cc2-bottom-nav button {
+    color: #708593 !important;
+  }
+
+  .cc2-bottom-nav button.active {
+    color: var(--dwr-blue) !important;
+    background: rgba(56, 157, 199, 0.10) !important;
+  }
+
+  :root[data-theme="dark"] .cc2-bottom-nav button {
+    color: var(--text-muted) !important;
+  }
+
+  :root[data-theme="dark"] .cc2-bottom-nav button.active {
+    color: var(--dwr-sky-bright) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .cc2-topbar {
+    border-top-width: 3px;
+  }
+
+  .cc2-brand-mark.cc2-owner-brand {
+    width: 46px;
+    height: 46px;
+    flex-basis: 46px;
+  }
+}
