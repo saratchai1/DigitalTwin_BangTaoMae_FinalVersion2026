@@ -1,14 +1,7 @@
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import view01 from "../assets/project-gallery/view-01.webp";
-import view02 from "../assets/project-gallery/view-02.webp";
-import view03 from "../assets/project-gallery/view-03.webp";
-import view04 from "../assets/project-gallery/view-04.webp";
-import view05 from "../assets/project-gallery/view-05.webp";
-import view06 from "../assets/project-gallery/view-06.webp";
+import { projectGalleryImages as PROJECT_GALLERY } from "../assets/project-gallery-hq2/images";
 import "./ProjectGallery.css";
-
-const PROJECT_GALLERY = [view01, view02, view03, view04, view05, view06] as const;
 
 export function ProjectGallery() {
   const [index, setIndex] = useState(0);
@@ -37,7 +30,7 @@ export function ProjectGallery() {
         style={{ transform: `translateX(-${index * 100}%)` }}
       >
         {PROJECT_GALLERY.map((image, imageIndex) => (
-          <figure className="cc2-project-gallery-slide" key={image}>
+          <figure className="cc2-project-gallery-slide" key={imageIndex}>
             <img
               src={image}
               alt={`ภาพแบบจำลองพื้นที่โครงการ มุมมอง ${imageIndex + 1}`}
