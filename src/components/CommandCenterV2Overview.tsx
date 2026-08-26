@@ -9,7 +9,6 @@ import {
   Wind,
   X,
 } from "lucide-react";
-import operationalTwinPhoto from "../assets/operational-twin-reservoir.webp";
 import {
   FALLBACK_ENVIRONMENT,
   STATIONS,
@@ -210,16 +209,7 @@ export function OverviewPage({
       <WaterQualityPanel compact />
 
       <section className="cc2-ops-grid">
-        <article className="cc2-panel">
-          <PanelHeading
-            kicker="OPERATIONAL TWIN"
-            title="โครงข่ายน้ำและจุดตรวจวัด"
-            action={<button className="cc2-primary-action" onClick={onOpenWater}>เปิดเครือข่ายน้ำ <ChevronRight size={14} /></button>}
-          />
-          <div className="cc2-operational-photo-direct">
-            <img src={operationalTwinPhoto} alt="ภาพพื้นที่โครงการบางเท่าแม่" />
-          </div>
-        </article>
+        <div className="cc2-overview-blank" aria-hidden="true" />
 
         <aside className="cc2-panel cc2-command-panel">
           <PanelHeading
