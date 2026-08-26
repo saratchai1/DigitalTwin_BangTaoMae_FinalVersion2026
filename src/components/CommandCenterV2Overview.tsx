@@ -27,6 +27,7 @@ import {
 } from "./CommandCenterV2Policy";
 import { PanelHeading, RainPanel, StationTable, StatusTag } from "./CommandCenterV2Shared";
 import { WaterQualityPanel } from "./CommandCenterV2Monitoring";
+import { ProjectGallery } from "./ProjectGallery";
 
 const SOURCE_SUMMARY = [
   { id: "dwr-ews", label: "DWR OFFICIAL" },
@@ -209,7 +210,7 @@ export function OverviewPage({
       <WaterQualityPanel compact />
 
       <section className="cc2-ops-grid">
-        <div className="cc2-overview-blank" aria-hidden="true" />
+        <ProjectGallery />
 
         <aside className="cc2-panel cc2-command-panel">
           <PanelHeading
