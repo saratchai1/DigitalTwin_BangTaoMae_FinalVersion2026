@@ -1,0 +1,1 @@
+Switching gallery to original source files; no resize/recompression.

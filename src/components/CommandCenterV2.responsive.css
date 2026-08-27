@@ -1,0 +1,163 @@
+/* Responsive */
+
+@media (max-width: 1320px) {
+  .cc2-rail { width: 228px; flex-basis: 228px; }
+  .cc2-mission { grid-template-columns: minmax(250px, 0.8fr) minmax(450px, 1.4fr); }
+  .cc2-mission .cc2-weather {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    border-top: 1px solid var(--border);
+    border-left: 0;
+  }
+  .cc2-weather-grid { margin-top: 0; }
+  .cc2-intelligence-grid { grid-template-columns: 1.25fr 0.75fr; }
+  .cc2-trust-panel { grid-column: 1 / -1; }
+  .cc2-trust-list { grid-template-columns: repeat(4, 1fr); }
+  .cc2-camera-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .cc2-dwr-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 1080px) {
+  .cc2-rail {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(300px, 88vw);
+    transform: translateX(-105%);
+    transition: transform 220ms ease;
+    box-shadow: 30px 0 70px rgba(0, 0, 0, 0.4);
+  }
+  .cc2-rail.open { transform: none; }
+  .cc2-close { display: grid; }
+  .cc2-backdrop {
+    position: fixed;
+    z-index: 35;
+    inset: 0;
+    display: block;
+    border: 0;
+    background: rgba(0, 6, 9, 0.67);
+    backdrop-filter: blur(3px);
+  }
+  .cc2-menu-button { display: grid; }
+  .cc2-theme-button { display: none; }
+  .cc2-ops-grid,
+  .cc2-env-hero,
+  .cc2-env-main-grid { grid-template-columns: 1fr; }
+  .cc2-command-body { grid-template-columns: 1fr 1fr; }
+  .cc2-decision { grid-column: 1 / -1; }
+  .cc2-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cc2-env-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cc2-camera-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 760px) {
+  .cc2-topbar { min-height: 71px; padding: 9px 11px; }
+  .cc2-topbar-title { gap: 8px; }
+  .cc2-topbar-title p { font-size: 7px; }
+  .cc2-topbar-title h1 { max-width: 210px; font-size: 16px; white-space: normal; }
+  .cc2-topbar-title span,
+  .cc2-sync-chip,
+  .cc2-simulation-badge { display: none; }
+  .cc2-topbar-actions { gap: 5px; }
+  .cc2-clock { min-width: 75px; border: 0; background: transparent; padding: 0; }
+  .cc2-clock strong { font-size: 11px; }
+  .cc2-clock span { font-size: 7px; }
+  .cc2-page { gap: 14px; padding: 13px 10px calc(83px + env(safe-area-inset-bottom)); }
+  .cc2-mission { grid-template-columns: 1fr; border-radius: 18px; }
+  .cc2-mission > section + section { border-top: 1px solid var(--border); border-left: 0; }
+  .cc2-mission > section { padding: 16px; }
+  .cc2-state-main { margin-top: 14px; }
+  .cc2-score { font-size: 48px; }
+  .cc2-vitals { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .cc2-vital { min-height: 94px; padding: 11px; }
+  .cc2-vital-value { font-size: 21px; }
+  .cc2-mission .cc2-weather { display: block; grid-column: auto; }
+  .cc2-weather-grid { margin-top: 12px; }
+  .cc2-panel { border-radius: 17px; }
+  .cc2-panel-head { align-items: flex-start; padding: 14px 14px 0; }
+  .cc2-panel-title h2 { font-size: 15px; }
+  .cc2-head-buttons button { min-width: 42px; justify-content: center; padding: 0 7px; }
+  .cc2-head-buttons button svg + * { display: none; }
+  .cc2-map { height: 340px; margin: 11px; }
+  .cc2-map-meta .cc2-map-chip:nth-child(2),
+  .cc2-map-coordinate { display: none; }
+  .cc2-map-legend { right: 9px; bottom: 9px; gap: 7px; }
+  .cc2-command-body { grid-template-columns: 1fr; padding: 11px; }
+  .cc2-decision { grid-column: auto; }
+  .cc2-intelligence-grid { grid-template-columns: 1fr; }
+  .cc2-trust-panel { grid-column: auto; }
+  .cc2-trust-list { grid-template-columns: 1fr 1fr; }
+  .cc2-rain-chart { height: 160px; }
+  .cc2-rain-bars { gap: 4px; }
+  .cc2-station-panel { overflow-x: auto; }
+  .cc2-station-table { min-width: 680px; }
+  .cc2-kpi-grid { gap: 9px; }
+  .cc2-kpi { min-height: 102px; padding: 13px; }
+  .cc2-kpi > strong { margin-top: 11px; font-size: 24px; }
+  .cc2-water-intro { align-items: flex-start; flex-direction: column; }
+  .cc2-water-legend { width: 100%; justify-content: space-between; }
+  .cc2-water-stations { grid-template-columns: 1fr; }
+  .cc2-water-stations .water-station-card.featured { grid-column: auto; }
+  .cc2-env-current-body { grid-template-columns: 1fr; padding: 18px 14px 14px; }
+  .cc2-env-temperature { width: max-content; }
+  .cc2-env-metrics { grid-template-columns: 1fr 1fr; }
+  .cc2-dwr-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 14px; }
+  .cc2-camera-grid { gap: 9px; }
+  .cc2-bottom-nav {
+    position: absolute;
+    z-index: 30;
+    right: 7px;
+    bottom: calc(7px + env(safe-area-inset-bottom));
+    left: 7px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    min-height: 62px;
+    padding: 5px;
+    border: 1px solid var(--border-strong);
+    border-radius: 18px;
+    background: rgba(7, 20, 25, 0.95);
+    box-shadow: 0 18px 54px rgba(0, 0, 0, 0.42);
+    backdrop-filter: blur(18px);
+  }
+  :root[data-theme="light"] .cc2-bottom-nav { background: rgba(255, 255, 255, 0.95); }
+  .cc2-bottom-nav button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 7px;
+  }
+  .cc2-bottom-nav button.active { color: var(--cyan); background: var(--cyan-soft); }
+}
+
+@media (max-width: 430px) {
+  .cc2-state-copy strong { font-size: 14px; }
+  .cc2-state-copy span { font-size: 8px; }
+  .cc2-state-meta { flex-wrap: wrap; }
+  .cc2-vital-value { font-size: 20px; }
+  .cc2-weather-temp { font-size: 38px; }
+  .cc2-rain-summary { grid-template-columns: 1fr 1fr; }
+  .cc2-rain-summary div:last-child { grid-column: 1 / -1; }
+  .cc2-trust-list { grid-template-columns: 1fr; }
+  .cc2-map-legend span:nth-child(2) { display: none; }
+  .cc2-camera-grid { grid-template-columns: 1fr; }
+  .cc2-dwr-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cc2-app *,
+  .cc2-app *::before,
+  .cc2-app *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
