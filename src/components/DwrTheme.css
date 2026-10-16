@@ -1,0 +1,106 @@
+/* Palette sampled from https://www.dwr.go.th/css/css.css on 2026-10-16:
+   navigation #05235b, decorative water accent #1eb8eb, white header/content.
+   Preserve the ownership-role layout and all semantic warning/critical colors. */
+:root, :root[data-theme="light"] {
+  color-scheme: light;
+  --dwr-navy: #05235b;
+  --dwr-sky: #1eb8eb;
+  --bg: #f1f3f6;
+  --bg-soft: #eaf0f7;
+  --sidebar: #05235b;
+  --surface: #ffffff;
+  --surface-solid: #ffffff;
+  --surface-hover: #eef5fb;
+  --border: #d9e2ee;
+  --border-strong: #b6c9df;
+  --text: #132e54;
+  --text-muted: #4c617b;
+  --text-dim: #596b81;
+  --cyan: #00689b;
+  --cyan-soft: #e8f5fc;
+  --blue: #155aac;
+  --violet: #6350b1;
+  --green: #137646;
+  --amber: #975b08;
+  --red: #bb3048;
+  --grid-line: #dde6ef;
+  --shadow: 0 8px 28px rgba(5,35,91,.07);
+  --shadow-soft: 0 4px 16px rgba(5,35,91,.05);
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #07152e;
+  --bg-soft: #0a1c38;
+  --surface: #102441;
+  --surface-solid: #102441;
+  --surface-hover: #183253;
+  --border: #29425f;
+  --border-strong: #4b6a8a;
+  --text: #f1f6ff;
+  --text-muted: #b6c7dc;
+  --text-dim: #93abc6;
+  --cyan: #54cafa;
+  --cyan-soft: rgba(30,184,235,.12);
+  --blue: #82b2ff;
+  --violet: #b8a4ff;
+  --green: #64d9a0;
+  --amber: #f5bd6a;
+  --red: #ff8194;
+  --grid-line: #28425f;
+  --shadow: 0 8px 28px rgba(0,0,0,.18);
+  --shadow-soft: 0 4px 16px rgba(0,0,0,.12);
+}
+body { background: var(--bg); }
+:root[data-theme] .cc2-rail {
+  --text: #ffffff;
+  --text-muted: #d0e0f4;
+  --text-dim: #b9cee9;
+  --cyan: #80d8f6;
+  --border: rgba(206,225,255,.19);
+  --green: #7be0b0;
+  --amber: #ffcc80;
+  --red: #ff99a7;
+  background: var(--dwr-navy);
+  color: var(--text);
+  box-shadow: 4px 0 18px rgba(5,35,91,.1);
+}
+:root[data-theme] .cc2-rail::after { background: var(--dwr-sky); opacity: .8; }
+:root[data-theme] .cc2-brand-mark.cc2-owner-brand { background: #fff; border-color: #b7dff6; box-shadow: none; }
+:root[data-theme] .cc2-nav button { color: var(--text-muted); }
+:root[data-theme] .cc2-nav button:hover { background: #113772; }
+:root[data-theme] .cc2-nav button.active { background: #153f7d; border-color: var(--dwr-sky); color: #fff; box-shadow: inset 3px 0 var(--dwr-sky); }
+:root[data-theme] .cc2-nav button.active .cc2-nav-icon { background: rgba(30,184,235,.2); color: #a7e9ff; }
+:root[data-theme] .cc2-source-card { background: #082b65; }
+:root[data-theme] .cc2-topbar { background: var(--surface-solid); border-bottom: 3px solid var(--dwr-navy); box-shadow: 0 3px 12px rgba(5,35,91,.04); }
+:root[data-theme="light"] .cc2-topbar-title h1 { color: var(--dwr-navy); }
+:root[data-theme] .cc2-topbar-title p { color: var(--cyan); }
+:root[data-theme] .cc2-project-role { background: var(--bg-soft); border-color: var(--border); box-shadow: none; }
+:root[data-theme] .cc2-project-role.site { border-color: #c1cfe1; }
+:root[data-theme] .cc2-project-role.contractor { border-color: #b2d9ef; }
+:root[data-theme] .cc2-project-role-logo { box-shadow: none; }
+:root[data-theme] .cc2-icon-button { background: var(--surface); border-color: var(--border); color: var(--text-muted); }
+:root[data-theme] .cc2-icon-button:hover { background: var(--cyan-soft); color: var(--cyan); }
+:root[data-theme] .cc2-panel, :root[data-theme] .cc2-highway-cctv { border-color: var(--border); box-shadow: var(--shadow-soft); }
+:root[data-theme] .cc2-highway-cctv { background: var(--surface); }
+:root[data-theme] .cc2-highway-cctv-head { background: var(--surface); border-bottom: 2px solid var(--dwr-sky); }
+:root[data-theme] .cc2-highway-cctv-icon { background: var(--cyan-soft); color: var(--cyan); border-color: var(--border); }
+:root[data-theme] .cc2-highway-cctv-meta { background: var(--bg-soft); }
+:root[data-theme] .cc2-highway-cctv-meta a { color: var(--cyan); }
+/* Actual camera footage and 3D render materials are deliberately not recolored. */
+.cc2-highway-video-state { color: #f4f8ff; }
+.cc2-highway-video-state.loading { pointer-events: none; }
+.cc2-highway-video-state.loading strong { color: #fff; }
+.cc2-highway-video-state.loading span { color: #cee1f2; }
+.cc2-highway-live-badge.buffering, .cc2-highway-live-badge.paused, .cc2-highway-live-badge.ready { color: var(--amber); }
+.cc2-highway-live-badge.buffering i, .cc2-highway-live-badge.paused i, .cc2-highway-live-badge.ready i { background: var(--amber); box-shadow: none; }
+.cc2-highway-video-wrap .cc2-video-play { position: absolute; z-index: 4; left: 50%; top: 48%; transform: translate(-50%,-50%); border: 1px solid #8fdcf9; border-radius: 12px; padding: 12px 18px; background: #05235b; color: #fff; cursor: pointer; }
+:root[data-theme] .cc2-bottom-nav { background: var(--surface-solid); border-top: 2px solid var(--dwr-navy); }
+:root[data-theme] .cc2-bottom-nav button { color: var(--text-muted); }
+:root[data-theme] .cc2-bottom-nav button.active { color: var(--cyan); background: var(--cyan-soft); }
+:root[data-theme="light"] .cc2-highway-live-badge.live { color: #11683e; background: #e8f6ee; }
+:root[data-theme="light"] .cc2-highway-live-badge.unavailable { color: #a3233d; background: #fff0f2; }
+:root[data-theme="light"] :is(.cc2-chart-tooltip,.chart-tooltip) { color: var(--text); background: #fff; border-color: var(--border); }
+@media (max-width: 640px) {
+  .cc2-highway-cctv-meta { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .cc2-highway-cctv-title h2 { font-size: 14px; }
+}

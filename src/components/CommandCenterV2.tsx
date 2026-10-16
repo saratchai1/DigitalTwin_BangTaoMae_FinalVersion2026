@@ -16,6 +16,7 @@ import "./CommandCenterV2.status.css";
 import "./CommandCenterV2.final.css";
 import "./CommandCenterV2.review.css";
 import "./ProjectIdentity.css";
+import "./DwrTheme.css";
 
 export interface CommandCenterV2Props {
   iTwinId: string;
@@ -46,14 +47,20 @@ const SOURCE_ITEMS = [
 export function CommandCenterV2(_props: CommandCenterV2Props) {
   const [activeMenu, setActiveMenu] = useState<MenuKey>("overview");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isLight, setIsLight] = useState(false);
+  const [isLight, setIsLight] = useState(() => {
+    try { return localStorage.getItem("btm-dwr-theme") !== "dark"; }
+    catch { return true; }
+  });
   const [now, setNow] = useState(new Date());
   const [environment, setEnvironment] = useState<EnvironmentData>(FALLBACK_ENVIRONMENT);
   const [fallbackMode, setFallbackMode] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    document.documentElement.dataset.theme = isLight ? "light" : "dark";
+    const theme = isLight ? "light" : "dark";
+    document.documentElement.dataset.theme = theme;
+    try { localStorage.setItem("btm-dwr-theme", theme); } catch { /* Storage may be blocked. */ }
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", "#05235b");
   }, [isLight]);
 
   useEffect(() => {

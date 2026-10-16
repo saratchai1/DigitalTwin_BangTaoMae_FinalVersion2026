@@ -1,187 +1,91 @@
-const DOH_ORIGIN = "https://streaming2.highwaytraffic.go.th";
-const CAMERA_BASE_PATH = "/Phase14/PER_14_007.stream/";
-const DEFAULT_MASTER = `${DOH_ORIGIN}${CAMERA_BASE_PATH}playlist.m3u8`;
-const FALLBACK_PLAYLISTS = [
-  `${DOH_ORIGIN}${CAMERA_BASE_PATH}chunklist_w2015986280.m3u8`,
-  `${DOH_ORIGIN}${CAMERA_BASE_PATH}chunklist_w1474254560.m3u8`,
-  `${DOH_ORIGIN}${CAMERA_BASE_PATH}chunklist_w1698665729.m3u8`,
-  `${DOH_ORIGIN}${CAMERA_BASE_PATH}chunklist_w438386858.m3u8`,
-];
+import { Agent, request } from "node:https";
+import { rootCertificates } from "node:tls";
+import { dohIntermediate } from "../lib/doh-certificate.mjs";
 
-const entryCandidates = () => [
-  process.env.DOH_CCTV_HLS_URL,
-  DEFAULT_MASTER,
-  ...FALLBACK_PLAYLISTS,
-].filter(Boolean);
+export const CAMERA = Object.freeze({ id: "PER-14-007", highway: "4", controlSection: "1101", kilometer: "956+105" });
+const ORIGIN = "https://streaming2.highwaytraffic.go.th";
+const BASE = "/PER-14/PER_14_007.stream/";
+export const MASTER = `${ORIGIN}${BASE}playlist.m3u8`;
+const PROXY = "/.netlify/functions/doh-hls-proxy";
+// Supply the missing, independently verified intermediate; TLS verification stays enabled.
+const agent = new Agent({ ca: [...rootCertificates, dohIntermediate], keepAlive: true, maxSockets: 8 });
+const headers = { "access-control-allow-origin": "*", "access-control-allow-methods": "GET,OPTIONS", "access-control-allow-headers": "Range,Content-Type", "access-control-expose-headers": "Content-Range,Accept-Ranges", "cache-control": "no-store", "x-content-type-options": "nosniff" };
 
-function allowedUrl(value) {
+export function allowedUrl(value) {
   try {
-    const url = new URL(value);
-    return url.origin === DOH_ORIGIN && url.pathname.startsWith(CAMERA_BASE_PATH);
-  } catch {
-    return false;
-  }
+    const u = new URL(value);
+    return u.origin === ORIGIN && !u.username && !u.password && !u.hash && u.pathname.startsWith(BASE) && /^[a-zA-Z0-9_.-]+\.(m3u8|ts|m4s|mp4|key)$/.test(u.pathname.slice(BASE.length));
+  } catch { return false; }
 }
 
-function proxyUrl(value) {
-  return `/.netlify/functions/doh-hls-proxy?url=${encodeURIComponent(value)}`;
+export function rewritePlaylist(text, upstream) {
+  if (!text.trimStart().startsWith("#EXTM3U")) throw new Error("INVALID_PLAYLIST");
+  const rewrite = value => {
+    const absolute = new URL(value, upstream).href;
+    if (!allowedUrl(absolute)) throw new Error("INVALID_PLAYLIST_TARGET");
+    return `${PROXY}?url=${encodeURIComponent(absolute)}`;
+  };
+  return text.split(/\r?\n/).map(line => {
+    if (!line.trim()) return line;
+    if (line.startsWith("#")) return line.replace(/URI="([^"]+)"/g, (_, value) => `URI="${rewrite(value)}"`);
+    return rewrite(line.trim());
+  }).join("\n");
 }
 
-function rewriteUriAttributes(line, upstreamUrl) {
-  return line.replace(/URI="([^"]+)"/g, (_match, uri) => {
-    const absolute = new URL(uri, upstreamUrl).toString();
-    return allowedUrl(absolute) ? `URI="${proxyUrl(absolute)}"` : `URI="${uri}"`;
+export function fetchDoh(url, range, redirects = 0) {
+  if (!allowedUrl(url)) return Promise.reject(new Error("INVALID_TARGET"));
+  return new Promise((resolve, reject) => {
+    const req = request(url, { agent, method: "GET", headers: { accept: "*/*", ...(range ? { range } : {}) } }, response => {
+      const status = response.statusCode || 502;
+      if ([301,302,303,307,308].includes(status)) {
+        response.resume();
+        let next;
+        try { next = new URL(response.headers.location || "", url).href; } catch { reject(new Error("INVALID_REDIRECT")); return; }
+        if (redirects >= 2 || !allowedUrl(next)) { reject(new Error("INVALID_REDIRECT")); return; }
+        resolve(fetchDoh(next, range, redirects + 1));
+        return;
+      }
+      const chunks = []; let size = 0;
+      response.on("data", chunk => {
+        size += chunk.length;
+        if (size > 3 * 1024 * 1024) { req.destroy(new Error("RESPONSE_TOO_LARGE")); return; }
+        chunks.push(chunk);
+      });
+      response.on("error", reject);
+      response.on("end", () => resolve({ status, headers: response.headers, body: Buffer.concat(chunks), url }));
+    });
+    const deadline = setTimeout(() => req.destroy(new Error("UPSTREAM_TIMEOUT")), 10_000);
+    req.on("close", () => clearTimeout(deadline));
+    req.on("error", reject);
+    req.end();
   });
 }
 
-function rewritePlaylist(text, upstreamUrl) {
-  return text
-    .split(/\r?\n/)
-    .map((line) => {
-      const trimmed = line.trim();
-      if (!trimmed) return line;
-      if (trimmed.startsWith("#")) return rewriteUriAttributes(line, upstreamUrl);
-      const absolute = new URL(trimmed, upstreamUrl).toString();
-      return allowedUrl(absolute) ? proxyUrl(absolute) : line;
-    })
-    .join("\n");
-}
-
-async function fetchDoh(url, range) {
-  return fetch(url, {
-    redirect: "follow",
-    headers: {
-      accept: "*/*",
-      referer: "https://www.highwaytraffic.go.th/",
-      "user-agent": "Mozilla/5.0 (compatible; BangTaoMae-DigitalTwin/1.0; HLS-proxy)",
-      ...(range ? { range } : {}),
-    },
-    signal: AbortSignal.timeout(12_000),
-  });
-}
-
-async function resolveEntry() {
-  const attempts = [];
-  for (const candidate of entryCandidates()) {
-    if (!allowedUrl(candidate)) continue;
-    try {
-      const response = await fetchDoh(candidate);
-      const contentType = response.headers.get("content-type") || "";
-      const text = response.ok ? await response.text() : "";
-      const valid = response.ok && text.includes("#EXTM3U");
-      attempts.push({ url: candidate, status: response.status, contentType, valid });
-      if (valid) return { url: candidate, response, text, attempts };
-    } catch (error) {
-      attempts.push({ url: candidate, status: 0, contentType: "", valid: false, error: error instanceof Error ? error.message : "fetch failed" });
-    }
-  }
-  return { url: null, response: null, text: null, attempts };
-}
-
-const corsHeaders = {
-  "access-control-allow-origin": "*",
-  "access-control-allow-methods": "GET,OPTIONS",
-  "access-control-allow-headers": "Range,Content-Type",
-};
-
-export const handler = async (event) => {
-  if (event.httpMethod === "OPTIONS") {
-    return { statusCode: 204, headers: corsHeaders, body: "" };
-  }
-  if (event.httpMethod !== "GET") {
-    return { statusCode: 405, headers: { ...corsHeaders, "content-type": "text/plain; charset=utf-8" }, body: "Method not allowed" };
-  }
-
-  if (event.queryStringParameters?.probe === "1") {
-    const result = await resolveEntry();
-    return {
-      statusCode: result.url ? 200 : 503,
-      headers: { ...corsHeaders, "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
-      body: JSON.stringify({
-        camera: "PER-14-007",
-        selectedUrl: result.url,
-        stableMaster: DEFAULT_MASTER,
-        stableMasterSelected: result.url === DEFAULT_MASTER,
-        attempts: result.attempts,
-      }),
-    };
-  }
-
-  let target = event.queryStringParameters?.url || "";
-  let prefetched = null;
-  let prefetchedText = null;
-
-  if (!target) {
-    const entry = await resolveEntry();
-    if (!entry.url || !entry.response) {
-      return {
-        statusCode: 503,
-        headers: { ...corsHeaders, "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" },
-        body: "CCTV temporarily unavailable",
-      };
-    }
-    target = entry.url;
-    prefetched = entry.response;
-    prefetchedText = entry.text;
-  }
-
-  if (!allowedUrl(target)) {
-    return {
-      statusCode: 400,
-      headers: { ...corsHeaders, "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" },
-      body: "Invalid HLS target",
-    };
-  }
-
+export const handler = async event => {
+  if (event.httpMethod === "OPTIONS") return { statusCode: 204, headers, body: "" };
+  if (event.httpMethod !== "GET") return { statusCode: 405, headers, body: "Method not allowed" };
+  const query = event.queryStringParameters || {};
+  // Restrict overrides to this camera. Stale /Phase14/ values cannot select a dead source.
+  const configured = process.env.DOH_CCTV_HLS_URL;
+  const target = query.url || (configured && allowedUrl(configured) ? configured : MASTER);
+  const fail = (statusCode, code) => ({ statusCode, headers: { ...headers, "content-type": "application/json; charset=utf-8" }, body: JSON.stringify({ camera: CAMERA, available: false, code, message: "ไม่สามารถรับภาพจากกรมทางหลวงได้ในขณะนี้" }) });
+  if (!allowedUrl(target)) return fail(400, "INVALID_TARGET");
+  const range = event.headers?.range || event.headers?.Range;
+  if (range && !/^bytes=\d*-\d*$/.test(range)) return fail(400, "INVALID_RANGE");
   try {
-    const response = prefetched || await fetchDoh(target, event.headers?.range);
-    if (!response.ok) {
-      return {
-        statusCode: response.status,
-        headers: { ...corsHeaders, "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" },
-        body: "CCTV temporarily unavailable",
-      };
+    const result = await fetchDoh(target, range);
+    if (![200,206].includes(result.status)) return fail(503, `UPSTREAM_${result.status}`);
+    if (new URL(target).pathname.endsWith(".m3u8")) {
+      const rewritten = rewritePlaylist(result.body.toString("utf8"), result.url);
+      if (query.probe === "1") return { statusCode: 200, headers: { ...headers, "content-type": "application/json; charset=utf-8" }, body: JSON.stringify({ camera: CAMERA, available: true, selectedUrl: result.url, checkedAt: new Date().toISOString(), tlsVerified: true, note: "Playlist reachable; LIVE is shown only after video playback starts." }) };
+      return { statusCode: 200, headers: { ...headers, "content-type": "application/vnd.apple.mpegurl; charset=utf-8" }, body: rewritten };
     }
-
-    const contentType = response.headers.get("content-type") || "";
-    const isPlaylist = target.toLowerCase().includes(".m3u8") || contentType.includes("mpegurl");
-
-    if (isPlaylist) {
-      const text = prefetchedText ?? await response.text();
-      if (!text.includes("#EXTM3U")) throw new Error("Invalid HLS playlist");
-      return {
-        statusCode: 200,
-        headers: {
-          ...corsHeaders,
-          "content-type": "application/vnd.apple.mpegurl; charset=utf-8",
-          "cache-control": "no-store, max-age=0",
-        },
-        body: rewritePlaylist(text, response.url || target),
-      };
-    }
-
-    const buffer = Buffer.from(await response.arrayBuffer());
-    const headers = {
-      ...corsHeaders,
-      "content-type": contentType || (target.toLowerCase().endsWith(".ts") ? "video/mp2t" : "application/octet-stream"),
-      "cache-control": "public, max-age=10, s-maxage=10",
-    };
-    const contentRange = response.headers.get("content-range");
-    const acceptRanges = response.headers.get("accept-ranges");
-    if (contentRange) headers["content-range"] = contentRange;
-    if (acceptRanges) headers["accept-ranges"] = acceptRanges;
-
-    return {
-      statusCode: response.status,
-      headers,
-      body: buffer.toString("base64"),
-      isBase64Encoded: true,
-    };
-  } catch {
-    return {
-      statusCode: 502,
-      headers: { ...corsHeaders, "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" },
-      body: "CCTV temporarily unavailable",
-    };
+    const mediaHeaders = { ...headers, "content-type": result.headers["content-type"] || "video/mp2t", "cache-control": "public, max-age=10, s-maxage=10" };
+    for (const name of ["content-range", "accept-ranges"]) if (result.headers[name]) mediaHeaders[name] = result.headers[name];
+    return { statusCode: result.status, headers: mediaHeaders, body: result.body.toString("base64"), isBase64Encoded: true };
+  } catch (error) {
+    const code = error?.code || error?.message || "UPSTREAM_UNAVAILABLE";
+    console.warn("DOH PER-14-007", code);
+    return fail(502, code);
   }
 };
