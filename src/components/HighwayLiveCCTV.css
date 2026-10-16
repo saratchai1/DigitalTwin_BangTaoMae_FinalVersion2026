@@ -1,0 +1,314 @@
+.cc2-highway-cctv {
+  overflow: hidden;
+  border: 1px solid rgba(75, 214, 232, 0.18);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 94% 0%, rgba(75, 214, 232, 0.07), transparent 30%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.018), transparent 48%),
+    var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.cc2-highway-cctv-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 17px 18px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.cc2-highway-cctv-title {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+}
+
+.cc2-highway-cctv-icon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  place-items: center;
+  border: 1px solid rgba(75, 214, 232, 0.22);
+  border-radius: 12px;
+  color: var(--cyan);
+  background: rgba(75, 214, 232, 0.08);
+}
+
+.cc2-highway-cctv-title p {
+  margin: 0 0 5px;
+  color: var(--cyan);
+  font: 800 8px/1 Inter, sans-serif;
+  letter-spacing: 0.16em;
+}
+
+.cc2-highway-cctv-title h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+.cc2-highway-cctv-title div > span {
+  display: block;
+  margin-top: 5px;
+  color: var(--text-muted);
+  font-size: 9px;
+}
+
+.cc2-highway-live-badge {
+  display: inline-flex;
+  min-height: 30px;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 7px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-muted);
+  background: rgba(125, 175, 185, 0.035);
+  font: 800 8px/1 Inter, sans-serif;
+  letter-spacing: 0.08em;
+}
+
+.cc2-highway-live-badge i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.cc2-highway-live-badge.live {
+  color: var(--green);
+  border-color: rgba(32, 230, 138, 0.28);
+  background: rgba(32, 230, 138, 0.08);
+}
+
+.cc2-highway-live-badge.live i {
+  box-shadow: 0 0 11px rgba(32, 230, 138, 0.75);
+  animation: cc2-live-pulse 1.8s ease-in-out infinite;
+}
+
+.cc2-highway-live-badge.loading {
+  color: var(--amber);
+  border-color: rgba(255, 193, 69, 0.28);
+  background: rgba(255, 193, 69, 0.07);
+}
+
+.cc2-highway-live-badge.unavailable {
+  color: var(--red);
+  border-color: rgba(255, 63, 95, 0.28);
+  background: rgba(255, 63, 95, 0.07);
+}
+
+.cc2-highway-video-wrap {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  min-height: 260px;
+  background:
+    linear-gradient(rgba(75, 214, 232, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(75, 214, 232, 0.035) 1px, transparent 1px),
+    #051014;
+  background-size: 36px 36px;
+}
+
+.cc2-highway-video-wrap video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #020608;
+}
+
+.cc2-highway-video-state {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 7px;
+  padding: 24px;
+  color: var(--text-muted);
+  background: rgba(5, 16, 20, 0.88);
+  text-align: center;
+  backdrop-filter: blur(8px);
+}
+
+.cc2-highway-video-state svg {
+  color: var(--cyan);
+}
+
+.cc2-highway-video-state strong {
+  color: var(--text);
+  font-size: 13px;
+}
+
+.cc2-highway-video-state span {
+  max-width: 470px;
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.cc2-highway-video-state.loading svg {
+  animation: cc2-radio-breathe 1.5s ease-in-out infinite;
+}
+
+.cc2-highway-video-state.unavailable svg {
+  color: var(--red);
+}
+
+.cc2-highway-video-state button {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 7px;
+  margin-top: 5px;
+  padding: 0 11px;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  color: var(--text);
+  background: rgba(125, 175, 185, 0.05);
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.cc2-highway-video-overlay {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9px;
+  color: #eefafb;
+  background: rgba(3, 10, 13, 0.72);
+  backdrop-filter: blur(12px);
+}
+
+.cc2-highway-video-overlay span {
+  color: #53e5a9;
+  font: 800 8px/1 Inter, sans-serif;
+  letter-spacing: 0.08em;
+}
+
+.cc2-highway-video-overlay strong {
+  font-size: 9px;
+}
+
+.cc2-highway-cctv-meta {
+  display: grid;
+  grid-template-columns: 1.25fr 0.7fr 0.7fr auto;
+  gap: 1px;
+  border-top: 1px solid var(--border);
+  background: var(--border);
+}
+
+.cc2-highway-cctv-meta > div,
+.cc2-highway-cctv-meta > a {
+  min-width: 0;
+  padding: 11px 13px;
+  background: var(--surface);
+}
+
+.cc2-highway-cctv-meta span,
+.cc2-highway-cctv-meta strong {
+  display: block;
+}
+
+.cc2-highway-cctv-meta span {
+  color: var(--text-dim);
+  font-size: 7px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.cc2-highway-cctv-meta strong {
+  margin-top: 4px;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cc2-highway-cctv-meta > a {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  color: var(--cyan);
+  font-size: 8px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.cc2-highway-cctv.compact .cc2-highway-video-wrap {
+  max-height: 480px;
+}
+
+@keyframes cc2-live-pulse {
+  0%, 100% { opacity: 0.72; transform: scale(0.92); }
+  50% { opacity: 1; transform: scale(1.12); }
+}
+
+@keyframes cc2-radio-breathe {
+  0%, 100% { opacity: 0.55; transform: scale(0.96); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cc2-highway-live-badge.live i,
+  .cc2-highway-video-state.loading svg {
+    animation: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .cc2-highway-cctv-meta {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .cc2-highway-cctv-meta > a {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .cc2-highway-cctv-head {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 14px;
+  }
+
+  .cc2-highway-cctv-title {
+    align-items: flex-start;
+  }
+
+  .cc2-highway-cctv-title h2 {
+    font-size: 15px;
+  }
+
+  .cc2-highway-video-wrap {
+    min-height: 210px;
+  }
+
+  .cc2-highway-video-overlay {
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    justify-content: space-between;
+  }
+
+  .cc2-highway-cctv-meta {
+    grid-template-columns: 1fr;
+  }
+}
